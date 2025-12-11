@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AttendancePro</title>
+    <title>SJISecure</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -104,10 +104,10 @@
     <header class="p-4 flex justify-between items-center glass-panel border-b border-white/10 z-20">
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
-                <i class="fa-solid fa-qrcode text-xl text-white"></i>
+                <i class="fa-solid fa-shield-halved text-xl text-white"></i>
             </div>
             <div>
-                <h1 class="font-bold text-lg leading-tight">Attendance<span class="text-cyan-300">Pro</span></h1>
+                <h1 class="font-bold text-lg leading-tight">SJI<span class="text-cyan-300">Secure</span></h1>
                 <p class="text-xs text-blue-200">System Ready</p>
             </div>
         </div>
@@ -144,7 +144,20 @@
                     </div>
 
                     <!-- Scan Controls -->
-                    <div class="absolute bottom-4 left-0 right-0 p-4 flex justify-center gap-4 z-10">
+                    <div class="absolute bottom-4 left-0 right-0 p-4 flex flex-col items-center gap-3 z-10">
+                        <!-- Mode Toggle -->
+                        <div class="glass-panel p-1 rounded-full flex relative w-48">
+                            <div id="mode-indicator"
+                                class="absolute inset-y-1 left-1 w-[calc(50%-4px)] bg-cyan-500 rounded-full transition-all duration-300">
+                            </div>
+                            <button onclick="setMode('in')"
+                                class="flex-1 relative z-10 text-xs font-bold py-2 text-center transition-colors text-white"
+                                id="btn-mode-in">TIME IN</button>
+                            <button onclick="setMode('out')"
+                                class="flex-1 relative z-10 text-xs font-bold py-2 text-center transition-colors text-white/50"
+                                id="btn-mode-out">TIME OUT</button>
+                        </div>
+
                         <div id="controls-inactive" class="flex gap-2">
                             <button onclick="startScanner()"
                                 class="bg-cyan-500 hover:bg-cyan-400 text-white px-6 py-3 rounded-full font-semibold shadow-lg shadow-cyan-500/30 transition-all active:scale-95 flex items-center gap-2">
@@ -320,7 +333,8 @@
                     <p class="text-[10px] text-white/50 mt-2">Available variables: <code
                             class="bg-white/10 px-1 rounded text-cyan-300">{name}</code> <code
                             class="bg-white/10 px-1 rounded text-cyan-300">{time}</code> <code
-                            class="bg-white/10 px-1 rounded text-cyan-300">{date}</code></p>
+                            class="bg-white/10 px-1 rounded text-cyan-300">{date}</code> <code
+                            class="bg-white/10 px-1 rounded text-cyan-300">{status}</code></p>
                 </div>
 
                 <button onclick="saveSettings()"
@@ -378,6 +392,32 @@
 
             if (viewId === 'learners') renderLearners();
             if (viewId === 'logs') renderLogs();
+        }
+
+        // --- MODE TOGGLE ---
+        function setMode(m) {
+            store.mode = m;
+            const ind = document.getElementById('mode-indicator');
+            const bIn = document.getElementById('btn-mode-in');
+            const bOut = document.getElementById('btn-mode-out');
+
+            if (m === 'in') {
+                ind.style.left = '4px';
+                ind.classList.remove('bg-orange-500');
+                ind.classList.add('bg-cyan-500');
+                bIn.classList.remove('text-white/50');
+                bIn.classList.add('text-white');
+                bOut.classList.add('text-white/50');
+                bOut.classList.remove('text-white');
+            } else {
+                ind.style.left = 'calc(50% + 0px)';
+                ind.classList.remove('bg-cyan-500');
+                ind.classList.add('bg-orange-500');
+                bIn.classList.add('text-white/50');
+                bIn.classList.remove('text-white');
+                bOut.classList.remove('text-white/50');
+                bOut.classList.add('text-white');
+            }
         }
 
         // --- MODALS ---
@@ -562,20 +602,25 @@
                 section: data.s,
                 date: dateStr,
                 time: timeStr,
+                type: store.mode,
                 status: 'present'
             };
 
             store.logs.push(entry);
             save(); // Save immediately
 
-            logFeedback(`Marked ${data.n} as present`, "success");
+            const typeText = store.mode === 'in' ? 'Time In' : 'Time Out';
+            const statusText = store.mode === 'in' ? 'arrived at' : 'left';
+
+            logFeedback(`Marked ${data.n} (${typeText})`, "success");
 
             // SMS Trigger
             if (data.p) {
                 const msg = formatMessage(store.settings.template, {
                     name: data.n,
                     time: timeStr,
-                    date: dateStr
+                    date: dateStr,
+                    status: statusText
                 });
 
                 // Construct SMS Link
