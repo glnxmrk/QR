@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Attendance System</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4f46e5',
+                        secondary: '#10b981',
+                        dark: '#1e293b',
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- QR Code Scanner -->
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <!-- QR Code Generator -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Hide scrollbar for clean UI */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <i class="fa-solid fa-qrcode text-primary text-2xl mr-3"></i>
+                    <h1 class="font-bold text-xl tracking-tight text-slate-900">Attendance<span
+                            class="text-primary">Pro</span></h1>
+                </div>
+                <div class="flex items-center space-x-1">
+                    <button onclick="switchTab('scan')" id="nav-scan"
+                        class="nav-btn px-3 py-2 rounded-md text-sm font-medium text-white bg-primary transition-all">
+                        <i class="fa-solid fa-camera mr-1"></i> Scan
+                    </button>
+                    <button onclick="switchTab('learners')" id="nav-learners"
+                        class="nav-btn px-3 py-2 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-100 transition-all">
+                        <i class="fa-solid fa-users mr-1"></i> Learners
+                    </button>
+                    <button onclick="switchTab('logs')" id="nav-logs"
+                        class="nav-btn px-3 py-2 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-100 transition-all">
+                        <i class="fa-solid fa-list mr-1"></i> Logs
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto w-full">
+
+        <!-- SCANNER SECTION -->
+        <section id="view-scan" class="view-section space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Camera Feed -->
+                <div class="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden relative group">
+                    <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                        <h2 class="font-semibold text-slate-700 flex items-center">
+                            <i class="fa-solid fa-eye text-primary mr-2"></i> Live Scanner
+                        </h2>
+                        <div id="scan-status"
+                            class="text-xs px-2 py-1 rounded-full bg-slate-200 text-slate-600 font-medium">Camera Off
+                        </div>
+                    </div>
+
+                    <div class="relative bg-black h-80 flex flex-col items-center justify-center">
+                        <div id="reader" class="w-full h-full object-cover"></div>
+                        <div id="camera-placeholder"
+                            class="absolute inset-0 flex flex-col items-center justify-center text-slate-400">
+                            <i class="fa-solid fa-camera text-4xl mb-2 opacity-50"></i>
+                            <p class="text-sm">Camera is inactive</p>
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-white flex justify-center gap-3">
+                        <button onclick="startScanner()"
+                            class="bg-primary hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium shadow-md shadow-indigo-200 transition-all active:scale-95 flex items-center">
+                            <i class="fa-solid fa-play mr-2"></i> Start Camera
+                        </button>
+                        <button onclick="stopScanner()"
+                            class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg font-medium shadow-md shadow-red-200 transition-all active:scale-95 flex items-center">
+                            <i class="fa-solid fa-stop mr-2"></i> Stop
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Recent Scans / Info -->
+                <div class="bg-white rounded-2xl shadow-lg border border-slate-100 p-6 flex flex-col">
+                    <h2 class="font-semibold text-slate-700 mb-4 flex items-center">
+                        <i class="fa-solid fa-clock-rotate-left text-primary mr-2"></i> Latest Activity
+                    </h2>
+
+                    <div id="live-feedback" class="flex-grow space-y-3 overflow-y-auto max-h-[300px] pr-1">
+                        <!-- Dynamic scan results will appear here -->
+                        <div class="text-center text-slate-400 py-10 italic">
+                            Waiting for scans...
+                        </div>
+                    </div>
+
+                    <!-- Info Section -->
+                    <div class="mt-6 pt-6 border-t border-slate-100">
+                        <p class="text-xs text-slate-400"><i class="fa-solid fa-mobile-screen mr-1"></i> SMS will open
+                            in your default messaging app.</p>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- LEARNERS SECTION -->
+        <section id="view-learners" class="view-section hidden space-y-6">
+            <div class="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden">
+                <div
+                    class="p-6 border-b border-slate-100 bg-slate-50 flex justify-between items-center flex-wrap gap-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-800">Learner Management</h2>
+                        <p class="text-sm text-slate-500">Add, edit, and generate QR codes for learners.</p>
+                    </div>
+                    <button onclick="toggleModal('modal-add-learner')"
+                        class="bg-primary hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg font-medium shadow-md shadow-indigo-200 transition-all flex items-center">
+                        <i class="fa-solid fa-plus mr-2"></i> Add New Learner
+                    </button>
+                </div>
+
+                <div class="p-6">
+                    <div class="overflow-x-auto rounded-lg border border-slate-200">
+                        <table class="w-full text-left border-collapse">
+                            <thead class="bg-slate-100 text-slate-600 uppercase text-xs font-bold tracking-wider">
+                                <tr>
+                                    <th class="p-4">Name</th>
+                                    <th class="p-4">Section</th>
+                                    <th class="p-4">Parent's Mobile</th>
+                                    <th class="p-4 text-center">QR Code</th>
+                                    <th class="p-4 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="learners-table-body" class="divide-y divide-slate-100 text-sm text-slate-700">
+                                <!-- Learners populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- LOGS SECTION -->
+        <section id="view-logs" class="view-section hidden space-y-6">
+            <div class="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden">
+                <div class="p-6 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-800">Attendance Logs</h2>
+                        <p class="text-sm text-slate-500">History of all scans and SMS statuses.</p>
+                    </div>
+                    <button onclick="exportLogs()"
+                        class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-4 py-2 rounded-lg font-medium transition-all text-sm flex items-center">
+                        <i class="fa-solid fa-download mr-2"></i> Export CSV
+                    </button>
+                </div>
+
+                <div class="p-6">
+                    <div class="overflow-x-auto rounded-lg border border-slate-200">
+                        <table class="w-full text-left border-collapse">
+                            <thead class="bg-slate-100 text-slate-600 uppercase text-xs font-bold tracking-wider">
+                                <tr>
+                                    <th class="p-4">Time</th>
+                                    <th class="p-4">Date</th>
+                                    <th class="p-4">Learner</th>
+                                    <th class="p-4">Section</th>
+                                    <th class="p-4">SMS Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logs-table-body" class="divide-y divide-slate-100 text-sm text-slate-700">
+                                <!-- Logs populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+
+    <!-- MODAL: ADD LEARNER -->
+    <div id="modal-add-learner"
+        class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all scale-100">
+            <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                <h3 class="font-bold text-lg text-slate-800">Register Learner</h3>
+                <button onclick="toggleModal('modal-add-learner')"
+                    class="text-slate-400 hover:text-slate-600 transition-colors">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <form onsubmit="addLearner(event)" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
+                    <input type="text" name="name" required
+                        class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
+                        placeholder="e.g. John Doe">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Section/Grade</label>
+                    <input type="text" name="section" required
+                        class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
+                        placeholder="e.g. Grade 10 - Rizal">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Parent's Mobile Number</label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-2 text-slate-500 text-sm select-none"></span>
+                        <input type="tel" name="parent_no" required
+                            class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
+                            placeholder="09123456789">
+                    </div>
+                    <p class="text-xs text-slate-500 mt-1">Format: 09XXXXXXXXX (11 digits)</p>
+                </div>
+
+                <div class="pt-2">
+                    <button type="submit"
+                        class="w-full bg-primary hover:bg-indigo-700 text-white font-medium py-2.5 rounded-lg shadow-md hover:shadow-lg transition-all active:scale-[0.98]">
+                        Save Learner
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: VIEW QR -->
+    <div id="modal-view-qr"
+        class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden text-center p-8">
+            <h3 id="qr-modal-title" class="font-bold text-xl text-slate-800 mb-2">John Doe</h3>
+            <p class="text-slate-500 text-sm mb-6">Scan this code to record attendance</p>
+
+            <div id="qr-display-container" class="flex justify-center mb-6">
+                <!-- QR Code rendered here -->
+            </div>
+
+            <button onclick="toggleModal('modal-view-qr')"
+                class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium px-6 py-2 rounded-lg transition-all">
+                Close
+            </button>
+            <button onclick="printQR()"
+                class="ml-2 bg-primary text-white font-medium px-6 py-2 rounded-lg transition-all hover:bg-indigo-700">
+                <i class="fa-solid fa-print mr-1"></i> Print
+            </button>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * STATE MANAGEMENT
+         */
+        const store = {
+            learners: JSON.parse(localStorage.getItem('learners')) || [],
+            logs: JSON.parse(localStorage.getItem('logs')) || [],
+            scanning: false
+        };
+
+        const saveStore = () => {
+            localStorage.setItem('learners', JSON.stringify(store.learners));
+            localStorage.setItem('logs', JSON.stringify(store.logs));
+        };
+
+        /**
+         * UI FUNCTIONS
+         */
+        function switchTab(tabId) {
+            // Update nav buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-primary', 'text-white');
+                btn.classList.add('text-slate-600', 'hover:bg-slate-100');
+            });
+            const activeBtn = document.getElementById(`nav-${tabId}`);
+            activeBtn.classList.remove('text-slate-600', 'hover:bg-slate-100');
+            activeBtn.classList.add('bg-primary', 'text-white');
+
+            // Show section
+            document.querySelectorAll('.view-section').forEach(sec => sec.classList.add('hidden'));
+            document.getElementById(`view-${tabId}`).classList.remove('hidden');
+
+            if (tabId === 'learners') renderLearners();
+            if (tabId === 'logs') renderLogs();
+        }
+
+        function toggleModal(modalId) {
+            const el = document.getElementById(modalId);
+            el.classList.toggle('hidden');
+        }
+
+        function renderLearners() {
+            const tbody = document.getElementById('learners-table-body');
+            tbody.innerHTML = '';
+
+            if (store.learners.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-400">No learners registered yet.</td></tr>`;
+                return;
+            }
+
+            store.learners.forEach((l, index) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition-colors";
+                tr.innerHTML = `
+                    <td class="p-4 font-medium text-slate-800">${l.name}</td>
+                    <td class="p-4 text-slate-600">${l.section}</td>
+                    <td class="p-4 text-slate-600">${l.parent_no}</td>
+                    <td class="p-4 text-center">
+                        <button onclick="viewQR(${index})" class="text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 px-3 py-1 rounded transition-all text-xs font-bold uppercase tracking-wide border border-indigo-200">
+                            <i class="fa-solid fa-qrcode mr-1"></i> View
+                        </button>
+                    </td>
+                    <td class="p-4 text-right">
+                        <button onclick="deleteLearner(${index})" class="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-full transition-all" title="Delete">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderLogs() {
+            const tbody = document.getElementById('logs-table-body');
+            tbody.innerHTML = '';
+
+            // Sort by latest
+            const sortedLogs = [...store.logs].reverse();
+
+            if (sortedLogs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-400">No attendance records found.</td></tr>`;
+                return;
+            }
+
+            sortedLogs.forEach(log => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition-colors border-b border-slate-50";
+
+                let statusBadge = '';
+                if (log.sms_status === 'opened') statusBadge = '<span class="text-xs font-bold text-emerald-600 bg-emerald-100 px-2 py-1 rounded-full">Msg App Opened</span>';
+                else if (log.sms_status === 'failed') statusBadge = '<span class="text-xs font-bold text-red-600 bg-red-100 px-2 py-1 rounded-full">Failed</span>';
+                else statusBadge = '<span class="text-xs font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded-full">Pending/Skip</span>';
+
+                tr.innerHTML = `
+                    <td class="p-4 text-slate-800 font-mono text-xs">${log.time}</td>
+                    <td class="p-4 text-slate-600 text-sm">${log.date}</td>
+                    <td class="p-4 font-medium text-slate-800">${log.name}</td>
+                    <td class="p-4 text-slate-500 text-sm">${log.section}</td>
+                    <td class="p-4">${statusBadge}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        /**
+         * LOGIC: LEARNERS
+         */
+        function addLearner(e) {
+            e.preventDefault();
+            const form = e.target;
+            const newLearner = {
+                id: Date.now().toString(36), // Simple ID
+                name: form.name.value.trim(),
+                section: form.section.value.trim(),
+                parent_no: form.parent_no.value.trim()
+            };
+
+            store.learners.push(newLearner);
+            saveStore();
+
+            form.reset();
+            toggleModal('modal-add-learner');
+            renderLearners();
+
+            // Show toast/alert (simple for now)
+            alert(`Registered ${newLearner.name} successfully!`);
+        }
+
+        function deleteLearner(index) {
+            if (confirm("Are you sure you want to remove this learner?")) {
+                store.learners.splice(index, 1);
+                saveStore();
+                renderLearners();
+            }
+        }
+
+        function viewQR(index) {
+            const learner = store.learners[index];
+            document.getElementById('qr-modal-title').innerText = learner.name;
+            const container = document.getElementById('qr-display-container');
+            container.innerHTML = ""; // Clear prev
+
+            // Create QR
+            const payload = JSON.stringify({
+                id: learner.id,
+                n: learner.name,
+                s: learner.section,
+                p: learner.parent_no
+            });
+
+            new QRCode(container, {
+                text: payload,
+                width: 200,
+                height: 200,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+
+            toggleModal('modal-view-qr');
+        }
+
+        function printQR() {
+            const win = window.open('', '', 'height=500,width=500');
+            const qrHtml = document.getElementById('qr-display-container').innerHTML;
+            const name = document.getElementById('qr-modal-title').innerText;
+            win.document.write('<html><head><title>Print QR</title></head><body style="text-align:center; font-family: sans-serif;">');
+            win.document.write(`<h1>${name}</h1>`);
+            win.document.write(qrHtml);
+            win.document.write('</body></html>');
+            win.document.close();
+            win.print();
+        }
+
+        /**
+         * LOGIC: SCANNER & ATTENDANCE
+         */
+        let html5QrcodeScanner = null;
+
+        function startScanner() {
+            if (store.scanning) return;
+
+            const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+            html5QrcodeScanner = new Html5Qrcode("reader");
+
+            html5QrcodeScanner.start(
+                { facingMode: "environment" },
+                config,
+                onScanSuccess,
+                onScanFailure
+            ).then(() => {
+                store.scanning = true;
+                updateScannerUI(true);
+            }).catch(err => {
+                console.error("Error starting scanner", err);
+                alert("Could not start camera. Please ensure permissions are granted.");
+            });
+        }
+
+        function stopScanner() {
+            if (!store.scanning || !html5QrcodeScanner) return;
+
+            html5QrcodeScanner.stop().then(() => {
+                store.scanning = false;
+                updateScannerUI(false);
+                html5QrcodeScanner.clear();
+            }).catch(err => console.log("Failed to stop", err));
+        }
+
+        function updateScannerUI(isScanning) {
+            const statusBadge = document.getElementById('scan-status');
+            const placeholder = document.getElementById('camera-placeholder');
+
+            if (isScanning) {
+                statusBadge.innerText = "Live";
+                statusBadge.className = "text-xs px-2 py-1 rounded-full bg-red-100 text-red-600 font-bold animate-pulse";
+                placeholder.classList.add('hidden');
+            } else {
+                statusBadge.innerText = "Camera Off";
+                statusBadge.className = "text-xs px-2 py-1 rounded-full bg-slate-200 text-slate-600 font-medium";
+                placeholder.classList.remove('hidden');
+            }
+        }
+
+        // Prevent double scans in short duration
+        let lastScanTime = 0;
+        const SCAN_COOLDOWN = 3000; // 3 seconds
+
+        function onScanSuccess(decodedText, decodedResult) {
+            const now = Date.now();
+            if (now - lastScanTime < SCAN_COOLDOWN) return;
+            lastScanTime = now;
+
+            // Attempt parse
+            try {
+                const data = JSON.parse(decodedText);
+
+                // Validate data structure
+                if (!data.n || !data.s) throw new Error("Invalid QR Data");
+
+                const learnerName = data.n;
+                const learnerSection = data.s;
+                const parentNo = data.p;
+
+                processAttendance(learnerName, learnerSection, parentNo);
+
+            } catch (e) {
+                console.log("Scan parse error (might be raw text): ", e);
+                // Fallback if user scanned something else
+                addFeedbackItem(`Invalid QR Code: ${decodedText.substring(0, 10)}...`, 'error');
+            }
+        }
+
+        function onScanFailure(error) {
+            // console.warn(`Code scan error = ${error}`);
+        }
+
+        function processAttendance(name, section, parentNo) {
+            const dateObj = new Date();
+            const dateStr = dateObj.toLocaleDateString();
+            const timeStr = dateObj.toLocaleTimeString();
+
+            // 1. Log to system
+            const logEntry = {
+                name,
+                section,
+                date: dateStr,
+                time: timeStr,
+                sms_status: 'pending'
+            };
+
+            store.logs.push(logEntry);
+            saveStore();
+            renderLogs(); // Update logs tab if open, but we stay on scan tab
+
+            addFeedbackItem(`Welcome, ${name}! Opening SMS...`, 'success');
+
+            // 2. Open SMS App
+            if (parentNo) {
+                openSMSApp(parentNo, name, timeStr, logEntry);
+            } else {
+                logEntry.sms_status = 'skipped (no number)';
+                saveStore();
+                renderLogs();
+            }
+        }
+
+        function openSMSApp(number, name, time, logEntry) {
+            const message = encodeURIComponent(`Good day! Your child ${name} has arrived at school at ${time}.`);
+            const url = `sms:${number}?body=${message}`;
+
+            // Mark as opened
+            logEntry.sms_status = 'opened';
+            saveStore();
+            renderLogs();
+
+            // Navigate
+            // Using a timeout to allow the UI update to render before the browser context switch
+            setTimeout(() => {
+                window.location.href = url;
+            }, 500);
+        }
+
+        function addFeedbackItem(msg, type) {
+            const container = document.getElementById('live-feedback');
+            const div = document.createElement('div');
+
+            let colorClass = "bg-slate-50 border-l-4 border-slate-400";
+            let icon = "fa-info-circle";
+
+            if (type === 'success') {
+                colorClass = "bg-emerald-50 border-l-4 border-emerald-500 text-emerald-700";
+                icon = "fa-check-circle";
+            }
+            if (type === 'error') {
+                colorClass = "bg-red-50 border-l-4 border-red-500 text-red-700";
+                icon = "fa-triangle-exclamation";
+            }
+            if (type === 'warning') {
+                colorClass = "bg-amber-50 border-l-4 border-amber-500 text-amber-700";
+                icon = "fa-bell";
+            }
+            // For info
+            if (type === 'info') {
+                colorClass = "bg-blue-50 border-l-4 border-blue-500 text-blue-700";
+            }
+
+            div.className = `p-3 rounded-r shadow-sm text-sm flex items-center ${colorClass} animate-fade-in-down`;
+            div.innerHTML = `
+                <i class="fa-solid ${icon} mr-3 text-lg"></i>
+                <div>
+                    <span class="font-semibold block text-xs uppercase opacity-75">${new Date().toLocaleTimeString()}</span>
+                    <span>${msg}</span>
+                </div>
+            `;
+
+            container.prepend(div);
+
+            // Limit items
+            if (container.children.length > 10) {
+                container.lastElementChild.remove();
+            }
+        }
+
+        // Init
+        (function init() {
+            switchTab('scan');
+        })();
+
+    </script>
+</body>
+
+</html>
