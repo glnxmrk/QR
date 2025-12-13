@@ -160,10 +160,14 @@
 
                     <!-- Scan Controls -->
                     <div class="absolute bottom-4 left-0 right-0 p-4 flex flex-col items-center gap-3 z-10">
-                        <div id="controls-inactive" class="flex gap-2">
+                        <div id="controls-inactive" class="flex gap-3">
                             <button onclick="startScanner()"
-                                class="bg-cyan-500 hover:bg-cyan-400 text-white px-6 py-3 rounded-full font-semibold shadow-lg shadow-cyan-500/30 transition-all active:scale-95 flex items-center gap-2">
+                                class="bg-cyan-500 hover:bg-cyan-400 text-white px-5 py-3 rounded-full font-semibold shadow-lg shadow-cyan-500/30 transition-all active:scale-95 flex items-center gap-2">
                                 <i class="fa-solid fa-play"></i> Scan
+                            </button>
+                            <button onclick="openManualEntry()"
+                                class="glass-btn text-white px-5 py-3 rounded-full font-semibold shadow-lg transition-all active:scale-95 flex items-center gap-2">
+                                <i class="fa-solid fa-keyboard"></i> Manual
                             </button>
                         </div>
                         <div id="controls-active" class="hidden flex gap-2">
@@ -229,30 +233,92 @@
                     </div>
                 </div>
 
-                <div class="glass-panel rounded-2xl p-4 mb-4">
-                    <label class="block text-xs uppercase text-blue-200 font-bold tracking-wider mb-3">Download
-                        Report</label>
-                    <div class="flex gap-2 flex-wrap">
-                        <button onclick="downloadReport('daily')"
-                            class="glass-btn px-4 py-2 rounded-lg font-medium text-sm text-white/90 hover:bg-white/20 transition-colors">
-                            <i class="fa-solid fa-calendar-day mr-1"></i> Daily
-                        </button>
-                        <button onclick="downloadReport('weekly')"
-                            class="glass-btn px-4 py-2 rounded-lg font-medium text-sm text-white/90 hover:bg-white/20 transition-colors">
-                            <i class="fa-solid fa-calendar-week mr-1"></i> Weekly
-                        </button>
-                        <button onclick="downloadReport('monthly')"
-                            class="glass-btn px-4 py-2 rounded-lg font-medium text-sm text-white/90 hover:bg-white/20 transition-colors">
-                            <i class="fa-solid fa-calendar mr-1"></i> Monthly
-                        </button>
-                        <button onclick="exportLogs()"
+                <div class="glass-panel rounded-2xl p-4 mb-4 space-y-4">
+                    <div class="relative">
+                        <label class="block text-xs uppercase text-blue-200 font-bold tracking-wider mb-2">Filter by Section</label>
+                        <select id="report-section-selector" onchange="renderLogs()" class="glass-input w-full p-3 rounded-xl font-semibold appearance-none">
+                            <option value="all">-- All Sections --</option>
+                            <!-- Populated by JS -->
+                        </select>
+                        <i class="fa-solid fa-chevron-down absolute right-4 top-10 -translate-y-1/2 text-white/30 pointer-events-none"></i>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs uppercase text-blue-200 font-bold tracking-wider mb-2">Daily Report</label>
+                        <div class="flex gap-2">
+                            <input type="date" id="report-daily-date" class="glass-input p-2 rounded-lg text-sm flex-grow" style="color-scheme: dark;">
+                            <button onclick="viewReport('daily')" class="glass-btn px-4 py-2 rounded-lg font-medium text-sm text-white/90 hover:bg-white/20 transition-colors flex-shrink-0">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                            <button onclick="downloadReport('daily')" class="glass-btn px-4 py-2 rounded-lg font-medium text-sm text-white/90 hover:bg-white/20 transition-colors flex-shrink-0">
+                                <i class="fa-solid fa-download"></i>
+                            </button>
+                        </div>
+                    </div>
+                     <div>
+                        <label class="block text-xs uppercase text-blue-200 font-bold tracking-wider mb-2">Weekly Report</label>
+                        <div class="flex gap-2">
+                            <input type="week" id="report-weekly-week" class="glass-input p-2 rounded-lg text-sm flex-grow" style="color-scheme: dark;">
+                            <button onclick="viewReport('weekly')" class="glass-btn px-4 py-2 rounded-lg font-medium text-sm text-white/90 hover:bg-white/20 transition-colors flex-shrink-0">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                            <button onclick="downloadReport('weekly')" class="glass-btn px-4 py-2 rounded-lg font-medium text-sm text-white/90 hover:bg-white/20 transition-colors flex-shrink-0">
+                                <i class="fa-solid fa-download"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs uppercase text-blue-200 font-bold tracking-wider mb-2">Monthly Report</label>
+                        <div class="flex gap-2">
+                            <input type="month" id="report-monthly-month" class="glass-input p-2 rounded-lg text-sm flex-grow" style="color-scheme: dark;">
+                            <button onclick="viewReport('monthly')" class="glass-btn px-4 py-2 rounded-lg font-medium text-sm text-white/90 hover:bg-white/20 transition-colors flex-shrink-0">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                            <button onclick="downloadReport('monthly')" class="glass-btn px-4 py-2 rounded-lg font-medium text-sm text-white/90 hover:bg-white/20 transition-colors flex-shrink-0">
+                                <i class="fa-solid fa-download"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="border-t border-white/10 pt-4">
+                        <label class="block text-xs uppercase text-blue-200 font-bold tracking-wider mb-2">Track Individual Student</label>
+                        <div class="space-y-3">
+                            <select id="report-student-select" class="glass-input p-2 rounded-lg text-sm flex-grow" style="color-scheme: dark;">
+                                <option value="">Select a student...</option>
+                            </select>
+                            <div class="grid grid-cols-2 gap-2">
+                                <input type="date" id="student-report-date" onchange="clearOtherFilters(this.id)" class="glass-input p-2 rounded-lg text-sm" style="color-scheme: dark;" title="Filter by Date">
+                                <input type="week" id="student-report-week" onchange="clearOtherFilters(this.id)" class="glass-input p-2 rounded-lg text-sm" style="color-scheme: dark;" title="Filter by Week">
+                            </div>
+                             <input type="month" id="student-report-month" onchange="clearOtherFilters(this.id)" class="glass-input p-2 rounded-lg text-sm w-full" style="color-scheme: dark;" title="Filter by Month">
+                            <div class="flex gap-2">
+                                <button onclick="viewStudentReport()" class="glass-btn px-4 py-2 rounded-lg font-medium text-sm text-white/90 hover:bg-white/20 transition-colors flex-grow" title="View Student Logs">
+                                    <i class="fa-solid fa-eye mr-1"></i> View
+                                </button>
+                                <button onclick="downloadStudentReport()" class="glass-btn px-4 py-2 rounded-lg font-medium text-sm text-white/90 hover:bg-white/20 transition-colors flex-grow" title="Download Student Logs">
+                                    <i class="fa-solid fa-download mr-1"></i> Download
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="border-t border-white/10 pt-4">
+                         <label class="block text-xs uppercase text-blue-200 font-bold tracking-wider mb-2">Export All Data</label>
+                         <button onclick="exportLogs()"
                             class="glass-btn px-4 py-2 rounded-lg font-medium text-sm text-white/90 hover:bg-white/20 transition-colors">
                             <i class="fa-solid fa-download mr-1"></i> Raw CSV
                         </button>
                     </div>
                 </div>
 
-                <div class="glass-panel rounded-2xl overflow-hidden">
+                <!-- Report View Area -->
+                <div id="report-view-container" class="hidden">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 id="report-view-title" class="text-lg font-bold text-white/90">Report</h3>
+                        <button onclick="showAllLogsView()" class="text-sm text-cyan-300 hover:text-cyan-200 font-medium">&larr; Back to All Logs</button>
+                    </div>
+                    <div id="report-view-content" class="glass-panel rounded-2xl overflow-x-auto"></div>
+                </div>
+
+                <div id="all-logs-container" class="glass-panel rounded-2xl overflow-hidden">
                     <table class="w-full text-left text-sm">
                         <thead class="bg-white/10 text-blue-100 uppercase text-xs font-semibold">
                             <tr>
@@ -266,6 +332,33 @@
                         </tbody>
                     </table>
                 </div>
+            </div>
+        </section>
+
+        <!-- View: PROFILE -->
+        <section id="view-profile"
+            class="absolute inset-0 p-4 pb-24 overflow-y-auto view-section translate-x-full transition-all duration-300 hidden">
+            <div class="max-w-2xl mx-auto space-y-4">
+                <div>
+                    <h2 class="text-2xl font-bold">Teacher Profile</h2>
+                    <p class="text-white/60 text-sm">Manage your information</p>
+                </div>
+
+                <div class="glass-panel rounded-2xl p-6 space-y-6">
+                    <div class="flex flex-col items-center gap-4">
+                        <img id="profile-pic-preview" src="https://via.placeholder.com/128" alt="Profile Picture" class="w-32 h-32 rounded-full object-cover bg-white/10">
+                        <label for="profile-pic-upload" class="glass-btn px-4 py-2 rounded-lg font-medium text-sm text-white/90 hover:bg-white/20 transition-colors cursor-pointer">
+                            <i class="fa-solid fa-upload mr-2"></i>Change Picture
+                        </label>
+                        <input type="file" id="profile-pic-upload" class="hidden" accept="image/*" onchange="handleProfilePictureChange(event)">
+                    </div>
+                    <input type="text" id="profile-teacher-name" placeholder="Teacher's Name" class="glass-input w-full p-3 rounded-xl placeholder-white/30">
+                    <input type="text" id="profile-school-name" placeholder="School Name" class="glass-input w-full p-3 rounded-xl placeholder-white/30">
+                </div>
+
+                <button onclick="saveProfile()" class="w-full bg-cyan-500 hover:bg-cyan-400 py-3 rounded-xl font-bold text-white shadow-lg active:scale-95 transition-all">
+                    Save Profile
+                </button>
             </div>
         </section>
 
@@ -288,6 +381,11 @@
                 class="flex flex-col items-center justify-center w-full h-full text-white/60 hover:text-white transition-colors">
                 <i class="fa-solid fa-list-check text-xl mb-1"></i>
                 <span class="text-[10px] font-medium tracking-wide">LOGS</span>
+            </button>
+            <button onclick="navSwitch('profile')" id="btn-profile"
+                class="flex flex-col items-center justify-center w-full h-full text-white/60 hover:text-white transition-colors">
+                <i class="fa-solid fa-user-gear text-xl mb-1"></i>
+                <span class="text-[10px] font-medium tracking-wide">PROFILE</span>
             </button>
         </div>
     </nav>
@@ -324,6 +422,7 @@
         </div>
     </div>
 
+
     <!-- View QR Modal -->
     <div id="modal-view-qr"
         class="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
@@ -349,24 +448,33 @@
         class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="glass-panel bg-slate-900/90 rounded-2xl w-full max-w-sm p-6 border-white/20">
             <h3 class="text-xl font-bold mb-4">Settings</h3>
-
             <div class="space-y-4">
-                <div>
+                <div class="border-b border-white/10 pb-4">
+                    <label class="flex items-center justify-between cursor-pointer">
+                        <span class="block text-xs uppercase text-blue-200 font-bold tracking-wider">Send SMS Notifications</span>
+                        <div class="relative">
+                            <input type="checkbox" id="settings-send-sms" class="sr-only peer">
+                            <div class="w-11 h-6 bg-gray-600 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500"></div>
+                        </div>
+                    </label>
+                </div>
+                <div id="sms-templates-container">
                     <label class="block text-xs uppercase text-blue-200 font-bold tracking-wider mb-2">SMS Template -
                         Time In</label>
-                    <textarea id="settings-template-in" rows="3" class="glass-input w-full p-3 rounded-xl text-sm"
+                    <textarea id="settings-template-in" rows="3"
+                        class="glass-input w-full p-3 rounded-xl text-sm mb-4"
                         placeholder="Message for Time In..."></textarea>
-                </div>
 
-                <div>
-                    <label class="block text-xs uppercase text-blue-200 font-bold tracking-wider mb-2">SMS Template -
-                        Time Out</label>
-                    <textarea id="settings-template-out" rows="3" class="glass-input w-full p-3 rounded-xl text-sm"
-                        placeholder="Message for Time Out..."></textarea>
-                    <p class="text-[10px] text-white/50 mt-2">Available variables: <code
-                            class="bg-white/10 px-1 rounded text-cyan-300">{name}</code> <code
-                            class="bg-white/10 px-1 rounded text-cyan-300">{time}</code> <code
-                            class="bg-white/10 px-1 rounded text-cyan-300">{date}</code></p>
+                    <div>
+                        <label class="block text-xs uppercase text-blue-200 font-bold tracking-wider mb-2">SMS Template -
+                            Time Out</label>
+                        <textarea id="settings-template-out" rows="3" class="glass-input w-full p-3 rounded-xl text-sm"
+                            placeholder="Message for Time Out..."></textarea>
+                        <p class="text-[10px] text-white/50 mt-2">Available variables: <code
+                                class="bg-white/10 px-1 rounded text-cyan-300">{name}</code> <code
+                                class="bg-white/10 px-1 rounded text-cyan-300">{time}</code> <code
+                                class="bg-white/10 px-1 rounded text-cyan-300">{date}</code></p>
+                    </div>
                 </div>
 
                 <button onclick="saveSettings()"
@@ -381,15 +489,51 @@
         </div>
     </div>
 
+    <!-- Manual Entry Modal -->
+    <div id="modal-manual-entry"
+        class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div
+            class="glass-panel bg-slate-900/90 rounded-2xl w-full max-w-sm p-6 transform transition-all shadow-2xl border-white/20">
+            <h3 class="text-xl font-bold mb-4">Manual Attendance</h3>
+            <div class="space-y-4">
+                <input type="text" id="manual-search-input" onkeyup="searchLearnerForManualEntry()"
+                    placeholder="Type learner's name..."
+                    class="glass-input w-full p-3 rounded-xl placeholder-white/30">
+
+                <div id="manual-search-results" class="space-y-2 max-h-60 overflow-y-auto">
+                    <!-- Search results will be populated here -->
+                </div>
+
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="toggleModal('modal-manual-entry')"
+                        class="w-full py-3 rounded-xl font-medium text-white/60 hover:bg-white/10 transition-colors">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
+        // --- GLOBAL AUDIO CONTEXT ---
+        let audioContext;
+        try {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        } catch (e) {
+            console.error("Web Audio API is not supported in this browser.");
+            audioContext = null;
+        }
         // --- STATE ---
         const store = {
             learners: JSON.parse(localStorage.getItem('learners')) || [],
             logs: JSON.parse(localStorage.getItem('logs')) || [],
             settings: JSON.parse(localStorage.getItem('settings')) || {
+                sendSms: true,
                 templateIn: "Good day! Your child {name} has arrived at school at {time}.",
                 templateOut: "Good day! Your child {name} has left school at {time}."
+            },
+            profile: JSON.parse(localStorage.getItem('profile')) || {
+                name: '',
+                school: '',
+                picture: '' // Will be a base64 string
             },
             scanning: false,
             currentCamera: 'environment', // 'user' or 'environment' or ID
@@ -401,12 +545,13 @@
             localStorage.setItem('learners', JSON.stringify(store.learners));
             localStorage.setItem('logs', JSON.stringify(store.logs));
             localStorage.setItem('settings', JSON.stringify(store.settings));
+            localStorage.setItem('profile', JSON.stringify(store.profile));
         };
 
         // --- NAVIGATION ---
         function navSwitch(viewId) {
             // Update Btns
-            ['scan', 'learners', 'logs'].forEach(id => {
+            ['scan', 'learners', 'logs', 'profile'].forEach(id => {
                 const btn = document.getElementById(`btn-${id}`);
                 const isActive = id === viewId;
                 btn.classList.toggle('nav-active', isActive);
@@ -425,6 +570,7 @@
 
             if (viewId === 'learners') renderLearners();
             if (viewId === 'logs') renderLogs();
+            if (viewId === 'profile') renderProfile();
         }
 
         // --- MODE TOGGLE ---
@@ -462,8 +608,17 @@
             } else {
                 // Open
                 if (id === 'modal-settings') {
+                    // Ensure sendSms property exists
+                    if (typeof store.settings.sendSms === 'undefined') {
+                        store.settings.sendSms = true;
+                    }
+                    document.getElementById('settings-send-sms').checked = store.settings.sendSms;
                     document.getElementById('settings-template-in').value = store.settings.templateIn;
                     document.getElementById('settings-template-out').value = store.settings.templateOut;
+                    document.getElementById('sms-templates-container').style.display = store.settings.sendSms ? 'block' : 'none';
+                    document.getElementById('settings-send-sms').onchange = (e) => {
+                        document.getElementById('sms-templates-container').style.display = e.target.checked ? 'block' : 'none';
+                    };
                 }
                 el.classList.remove('hidden');
             }
@@ -471,13 +626,93 @@
 
         // --- SETTINGS ---
         function saveSettings() {
+            store.settings.sendSms = document.getElementById('settings-send-sms').checked;
             const tplIn = document.getElementById('settings-template-in').value;
             const tplOut = document.getElementById('settings-template-out').value;
-            store.settings.templateIn = tplIn;
+            store.settings.templateIn = tplIn; // Note: these are now inside a div
             store.settings.templateOut = tplOut;
             save();
             toggleModal('modal-settings');
             alert("Settings saved!");
+        }
+
+        // --- PROFILE ---
+        function renderProfile() {
+            document.getElementById('profile-teacher-name').value = store.profile.name || '';
+            document.getElementById('profile-school-name').value = store.profile.school || '';
+            const picPreview = document.getElementById('profile-pic-preview');
+            if (store.profile.picture) {
+                picPreview.src = store.profile.picture;
+            } else {
+                picPreview.src = 'https://via.placeholder.com/128/ffffff/1e3a8a?text=...'; // Placeholder
+            }
+        }
+
+        function saveProfile() {
+            store.profile.name = document.getElementById('profile-teacher-name').value.trim();
+            store.profile.school = document.getElementById('profile-school-name').value.trim();
+            save();
+            alert("Profile saved successfully!");
+        }
+
+        function handleProfilePictureChange(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const dataUrl = e.target.result;
+                document.getElementById('profile-pic-preview').src = dataUrl;
+                store.profile.picture = dataUrl;
+                // Automatically save when picture is changed
+                save();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // --- MANUAL ATTENDANCE ---
+        function openManualEntry() {
+            toggleModal('modal-manual-entry');
+            document.getElementById('manual-search-input').value = '';
+            searchLearnerForManualEntry(); // Initial render (empty)
+        }
+
+        function searchLearnerForManualEntry() {
+            const input = document.getElementById('manual-search-input').value.toLowerCase();
+            const resultsContainer = document.getElementById('manual-search-results');
+            resultsContainer.innerHTML = '';
+
+            if (!input) {
+                resultsContainer.innerHTML = '<p class="text-sm text-white/40 text-center py-4">Start typing to find a student.</p>';
+                return;
+            }
+
+            const filteredLearners = store.learners.filter(l => l.name.toLowerCase().includes(input));
+
+            if (filteredLearners.length === 0) {
+                resultsContainer.innerHTML = '<p class="text-sm text-white/40 text-center py-4">No students found.</p>';
+                return;
+            }
+
+            filteredLearners.forEach(learner => {
+                const el = document.createElement('button');
+                el.className = "w-full text-left glass-btn p-3 rounded-lg hover:bg-white/20 transition-colors";
+                el.onclick = () => markManualAttendance(learner.id);
+                el.innerHTML = `
+                    <div class="font-medium">${learner.name}</div>
+                    <div class="text-xs text-white/60">${learner.section}</div>
+                `;
+                resultsContainer.appendChild(el);
+            });
+        }
+
+        function markManualAttendance(learnerId) {
+            const learner = store.learners.find(l => l.id === learnerId);
+            if (!learner) return;
+            playBeep();
+            const data = { n: learner.name, s: learner.section, p: learner.parent_no };
+            handleAttendance(data);
+            toggleModal('modal-manual-entry');
         }
 
         // --- LEARNERS ---
@@ -652,8 +887,8 @@
             logFeedback(`Marked ${data.n} (${typeText})`, "success");
 
             // SMS Trigger
-            if (data.p) {
-                // Use appropriate template based on mode
+            if (store.settings.sendSms && data.p) {
+                // Use appropriate template based on mode if SMS is enabled
                 const template = store.mode === 'in' ? store.settings.templateIn : store.settings.templateOut;
                 const msg = formatMessage(template, {
                     name: data.n,
@@ -671,7 +906,7 @@
                 setTimeout(() => {
                     window.location.href = link;
                 }, 100);
-            } else {
+            } else if (store.settings.sendSms && !data.p) {
                 logFeedback("No parent number linked", "warning");
             }
         }
@@ -719,9 +954,31 @@
         // --- LOGS ---
         function renderLogs() {
             const c = document.getElementById('logs-list');
-            const logs = [...store.logs].reverse();
+            const sectionFilter = document.getElementById('report-section-selector').value;
+
+            populateSectionSelector();
+
+            // Filter logs by selected section
+            const logs = sectionFilter !== 'all'
+                ? [...store.logs].filter(l => l.section === sectionFilter).reverse() 
+                : [...store.logs].reverse();
             c.innerHTML = logs.length ? '' : '<tr><td colspan="3" class="p-4 text-center text-white/40">No records</td></tr>';
 
+            // Ensure the correct view is shown
+            document.getElementById('all-logs-container').classList.remove('hidden');
+            document.getElementById('report-view-container').classList.add('hidden');
+
+            // Populate student select dropdown
+            const studentSelect = document.getElementById('report-student-select');
+            // Only repopulate if it's empty to avoid flicker
+            if (studentSelect.options.length <= 1) {
+                store.learners.sort((a, b) => a.name.localeCompare(b.name)).forEach(learner => {
+                    const option = document.createElement('option');
+                    option.value = learner.id;
+                    option.textContent = learner.name;
+                    studentSelect.appendChild(option);
+                });
+            }
             logs.forEach(l => {
                 const tr = document.createElement('tr');
                 const badge = l.type === 'out'
@@ -738,33 +995,44 @@
         }
 
         function exportLogs() {
-            const csv = store.logs.map(l => `${l.date},${l.time},${l.name},${l.section},${l.type}`).join('\n');
-            const blob = new Blob(["Date,Time,Name,Section,Type\n" + csv], { type: 'text/csv' });
+            let csvContent = "Date,Time,Name,Section,Type\n";
+            const csvRows = store.logs.map(l => {
+                const row = [l.date, l.time, l.name, l.section, l.type];
+                return row.map(sanitizeCsvField).join(',');
+            });
+
+            csvContent += csvRows.join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = "attendance_logs.csv";
+            a.download = "sjisecure_all_logs.csv";
+            document.body.appendChild(a); // Append to body to ensure it works
             a.click();
+            document.body.removeChild(a); // Clean up
+            URL.revokeObjectURL(url); // Release memory
         }
 
         // --- BEEP SOUND ---
         function playBeep() {
+            if (!audioContext) return; // Don't play if context failed to create
             try {
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 const oscillator = audioContext.createOscillator();
                 const gainNode = audioContext.createGain();
 
                 oscillator.connect(gainNode);
                 gainNode.connect(audioContext.destination);
 
-                oscillator.frequency.value = 800;
-                oscillator.type = 'sine';
+                const now = audioContext.currentTime;
 
-                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                // Sound based on your previously provided code
+                oscillator.type = "square";
+                oscillator.frequency.setValueAtTime(1200, now); // Set pitch
+                gainNode.gain.setValueAtTime(0.3, now); // Set volume
 
-                oscillator.start(audioContext.currentTime);
-                oscillator.stop(audioContext.currentTime + 0.2);
+                oscillator.start(now);
+                oscillator.stop(now + 0.1); // Short beep duration
             } catch (e) {
                 console.error('Beep error:', e);
             }
@@ -772,33 +1040,70 @@
 
         // --- REPORTING SYSTEM ---
         function downloadReport(type) {
-            const now = new Date();
             let csv = '';
             let filename = '';
+            let targetDate;
 
             if (type === 'daily') {
-                csv = generateDailyReport(now);
-                filename = `daily_report_${now.toLocaleDateString().replace(/\//g, '-')}.csv`;
+                const dateValue = document.getElementById('report-daily-date').value;
+                if (!dateValue) { alert("Please select a date for the daily report."); return; }
+                targetDate = new Date(dateValue + 'T00:00:00'); // Adjust for timezone
+                csv = generateDailyReport(targetDate);
+                filename = `daily_report_${targetDate.toLocaleDateString().replace(/\//g, '-')}.csv`;
             } else if (type === 'weekly') {
-                csv = generateWeeklyReport(now);
-                filename = `weekly_report_${now.toLocaleDateString().replace(/\//g, '-')}.csv`;
+                const weekValue = document.getElementById('report-weekly-week').value;
+                if (!weekValue) { alert("Please select a week for the weekly report."); return; }
+                // weekValue is like "2023-W34". We need to convert this to a Date object.
+                const [year, week] = weekValue.split('-W');
+                targetDate = new Date(year, 0, 1 + (week - 1) * 7); // Get a date within that week
+                csv = generateWeeklyReport(targetDate);
+                const startDate = new Date(targetDate);
+                startDate.setDate(targetDate.getDate() - targetDate.getDay());
+                filename = `weekly_report_from_${startDate.toLocaleDateString().replace(/\//g, '-')}.csv`;
             } else if (type === 'monthly') {
-                csv = generateMonthlyReport(now);
-                filename = `monthly_report_${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}.csv`;
+                const monthValue = document.getElementById('report-monthly-month').value;
+                if (!monthValue) { alert("Please select a month for the monthly report."); return; }
+                targetDate = new Date(monthValue + '-02'); // Use day 2 to avoid timezone issues
+                csv = generateMonthlyReport(targetDate);
+                filename = `monthly_report_${targetDate.getFullYear()}-${(targetDate.getMonth() + 1).toString().padStart(2, '0')}.csv`;
             }
 
+            if (!csv) return;
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
             a.download = filename;
+            document.body.appendChild(a); // Append to body to ensure it works
             a.click();
-            URL.revokeObjectURL(url);
+            document.body.removeChild(a); // Clean up
+            URL.revokeObjectURL(url); // Release memory
+        }
+
+        // --- CSV SANITIZER ---
+        function sanitizeCsvField(field) {
+            if (field === null || typeof field === 'undefined') {
+                return '';
+            }
+            const str = String(field);
+            // If the string contains a comma, a double quote, or a newline, enclose it in double quotes.
+            if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+                // Escape any double quotes within the string by doubling them.
+                const escapedStr = str.replace(/"/g, '""');
+                return `"${escapedStr}"`;
+            }
+            return str;
         }
 
         function generateDailyReport(date) {
             const dateStr = date.toLocaleDateString();
-            const dailyLogs = store.logs.filter(l => l.date === dateStr);
+            const sectionFilter = document.getElementById('report-section-selector').value;
+            if (sectionFilter === 'all') { alert("Please select a specific section for this report."); return ""; }
+
+            const dailyLogs = store.logs.filter(l => 
+                l.date === dateStr && 
+                l.section === sectionFilter
+            );
 
             let csv = `Daily Attendance Report - ${dateStr}\n\n`;
             csv += 'No.,Name,Section,Time In,Time Out\n';
@@ -817,7 +1122,10 @@
 
             const learners = Object.values(learnerMap).sort((a, b) => a.name.localeCompare(b.name));
             learners.forEach((l, i) => {
-                csv += `${i + 1},${l.name},${l.section},${l.timeIn},${l.timeOut}\n`;
+                const row = [i + 1, l.name, l.section, l.timeIn, l.timeOut]
+                    .map(sanitizeCsvField)
+                    .join(',');
+                csv += row + '\n';
             });
 
             return csv;
@@ -825,17 +1133,23 @@
 
         function generateWeeklyReport(date) {
             const endDate = new Date(date);
+            endDate.setDate(endDate.getDate() - endDate.getDay() + 6); // End of the selected week (Saturday)
             const startDate = new Date(date);
-            startDate.setDate(endDate.getDate() - 6);
+            startDate.setDate(startDate.getDate() - startDate.getDay()); // Start of the selected week (Sunday)
 
             let csv = `Weekly Attendance Report - ${startDate.toLocaleDateString()} to ${endDate.toLocaleDateString()}\n\n`;
             csv += 'No.,Name,Section,Days Present,Days Absent\n';
+            const sectionFilter = document.getElementById('report-section-selector').value;
+            if (sectionFilter === 'all') { alert("Please select a specific section for this report."); return ""; }
 
             const learnerStats = {};
 
             store.logs.forEach(log => {
                 const logDate = new Date(log.date);
-                if (logDate >= startDate && logDate <= endDate && log.type === 'in') {
+                if (logDate >= startDate && 
+                    logDate <= endDate &&
+                    log.type === 'in' &&
+                    log.section === sectionFilter) {
                     if (!learnerStats[log.name]) {
                         learnerStats[log.name] = { name: log.name, section: log.section, days: new Set() };
                     }
@@ -843,13 +1157,23 @@
                 }
             });
 
-            const totalDays = 7;
-            const learners = Object.values(learnerStats).sort((a, b) => a.name.localeCompare(b.name));
+            // Calculate total business days in the week up to today
+            let businessDays = 0;
+            for (let d = new Date(startDate); d <= endDate && d <= new Date(); d.setDate(d.getDate() + 1)) {
+                const dayOfWeek = d.getDay();
+                if (dayOfWeek > 0 && dayOfWeek < 6) { // Monday to Friday
+                    businessDays++;
+                }
+            }
 
-            learners.forEach((l, i) => {
-                const present = l.days.size;
-                const absent = totalDays - present;
-                csv += `${i + 1},${l.name},${l.section},${present},${absent}\n`;
+            store.learners.sort((a, b) => a.name.localeCompare(b.name)).forEach((learner, i) => {
+                const stats = learnerStats[learner.name];
+                const present = stats ? stats.days.size : 0;
+                const absent = businessDays - present;
+                const row = [i + 1, learner.name, learner.section, present, absent]
+                    .map(sanitizeCsvField)
+                    .join(',');
+                csv += row + '\n';
             });
 
             return csv;
@@ -859,6 +1183,9 @@
             const year = date.getFullYear();
             const month = date.getMonth();
             const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            const sectionFilter = document.getElementById('report-section-selector').value;
+            if (sectionFilter === 'all') { alert("Please select a specific section for this report."); return ""; }
 
             const monthName = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
             let csv = `Monthly Attendance Report - ${monthName}\n\n`;
@@ -870,57 +1197,299 @@
             // Generate header
             csv += 'No.,Name,Gender,Section,';
             for (let day = 1; day <= daysInMonth; day++) {
-                csv += `Day ${day},`;
+                csv += `${day},`;
             }
             csv += 'Days Present,Days Absent\n';
 
             // Process male learners
             if (maleLearners.length > 0) {
-                csv += '\nMALE LEARNERS\n';
+                csv += 'MALE LEARNERS\n';
                 maleLearners.forEach((learner, index) => {
-                    csv += generateMonthlyLearnerRow(learner, index + 1, year, month, daysInMonth);
+                    csv += generateMonthlyLearnerRow(learner, index + 1, year, month, daysInMonth, sectionFilter);
                 });
             }
 
             // Process female learners
             if (femaleLearners.length > 0) {
-                csv += '\nFEMALE LEARNERS\n';
+                csv += '\nFEMALE LEARNERS\n'; // Add a blank line for separation
                 femaleLearners.forEach((learner, index) => {
-                    csv += generateMonthlyLearnerRow(learner, index + 1, year, month, daysInMonth);
+                    csv += generateMonthlyLearnerRow(learner, index + 1, year, month, daysInMonth, sectionFilter);
                 });
             }
 
             return csv;
         }
 
-        function generateMonthlyLearnerRow(learner, no, year, month, daysInMonth) {
-            let row = `${no},${learner.name},${learner.gender},${learner.section},`;
+        function generateMonthlyLearnerRow(learner, no, year, month, daysInMonth, section) {
+            let rowParts = [
+                no,
+                sanitizeCsvField(learner.name),
+                sanitizeCsvField(learner.gender),
+                sanitizeCsvField(learner.section)
+            ];
 
             let daysPresent = 0;
 
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Normalize today's date for accurate comparison
+
             for (let day = 1; day <= daysInMonth; day++) {
                 const checkDate = new Date(year, month, day);
-                const dateStr = checkDate.toLocaleDateString();
+                const dayOfWeek = checkDate.getDay(); // 0=Sun, 6=Sat
 
-                const hasTimeIn = store.logs.some(log =>
-                    log.name === learner.name &&
-                    log.date === dateStr &&
-                    log.type === 'in'
-                );
+                // Skip weekends
+                if (dayOfWeek === 0 || dayOfWeek === 6) {
+                    rowParts.push(''); // Leave cell blank for weekends
+                    continue;
+                }
 
+                const dateStr = checkDate.toLocaleDateString(); // M/D/YYYY format
+                const hasTimeIn = store.logs.some(log => 
+                    log.name === learner.name && 
+                    log.date === dateStr && 
+                    log.type === 'in' && 
+                    log.section === section);
+                
                 if (hasTimeIn) {
-                    row += 'P,';
+                    rowParts.push('/');
                     daysPresent++;
+                } else if (checkDate < today) {
+                    // Only mark absent if the day is in the past
+                    rowParts.push('X');
                 } else {
-                    row += 'A,';
+                    rowParts.push(''); // Leave future weekdays blank
                 }
             }
 
-            const daysAbsent = daysInMonth - daysPresent;
-            row += `${daysPresent},${daysAbsent}\n`;
+            const daysAbsent = (Array.from({length: daysInMonth}, (_, i) => new Date(year, month, i + 1)).filter(d => d.getDay() > 0 && d.getDay() < 6 && d < today).length) - daysPresent;
+            rowParts.push(daysPresent);
+            rowParts.push(daysAbsent);
+            const row = rowParts.join(',') + '\n';
 
             return row;
         }
+
+        // --- SECTION SELECTOR ---
+        function populateSectionSelector() {
+            const selector = document.getElementById('report-section-selector');
+            selector.innerHTML = '<option value="all">-- All Sections --</option>';
+            const sections = [...new Set(store.learners.map(l => l.section))].sort();
+            sections.forEach(s => {
+                const option = document.createElement('option');
+                option.value = s;
+                option.textContent = s;
+                selector.appendChild(option);
+            });
+        }
+
+        // --- ON-SCREEN REPORT VIEWING ---
+        function viewReport(type) {
+            let title = '';
+            let content = '';
+            let targetDate;
+
+            if (type === 'daily') {
+                const dateValue = document.getElementById('report-daily-date').value;
+                if (!dateValue) { alert("Please select a date for the daily report."); return; }
+                targetDate = new Date(dateValue + 'T00:00:00');
+                title = `Daily Report - ${targetDate.toLocaleDateString()}`;
+                content = generateDailyReportView(targetDate);
+            } else if (type === 'weekly') {
+                const weekValue = document.getElementById('report-weekly-week').value;
+                if (!weekValue) { alert("Please select a week for the weekly report."); return; }
+                const [year, week] = weekValue.split('-W');
+                targetDate = new Date(year, 0, 1 + (week - 1) * 7);
+                const startDate = new Date(targetDate);
+                startDate.setDate(targetDate.getDate() - targetDate.getDay());
+                const endDate = new Date(startDate);
+                endDate.setDate(startDate.getDate() + 6);
+                title = `Weekly Report: ${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`;
+                content = generateWeeklyReportView(targetDate);
+            } else if (type === 'monthly') {
+                const monthValue = document.getElementById('report-monthly-month').value;
+                if (!monthValue) { alert("Please select a month for the monthly report."); return; }
+                targetDate = new Date(monthValue + '-02');
+                title = `Monthly Report - ${targetDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`;
+                content = generateMonthlyReportView(targetDate);
+            }
+
+            document.getElementById('report-view-title').innerText = title;
+            document.getElementById('report-view-content').innerHTML = content;
+            document.getElementById('all-logs-container').classList.add('hidden');
+            document.getElementById('report-view-container').classList.remove('hidden');
+        }
+
+        function showAllLogsView() {
+            document.getElementById('all-logs-container').classList.remove('hidden');
+            document.getElementById('report-view-container').classList.add('hidden');
+        }
+
+        function generateDailyReportView(date) {
+            const data = generateDailyReport(date).split('\n').slice(2); // Get data rows from CSV function
+            let table = '<table class="w-full text-left text-sm"><thead><tr class="text-blue-100 uppercase text-xs font-semibold"><th class="p-3">#</th><th class="p-3">Name</th><th class="p-3">Section</th><th class="p-3">Time In</th><th class="p-3">Time Out</th></tr></thead><tbody>';
+            if (data.length === 0 || (data.length === 1 && data[0] === '')) {
+                return '<p class="p-4 text-center text-white/50">No attendance records for this day.</p>';
+            }
+            data.forEach(rowStr => {
+                if (!rowStr) return;
+                const [no, name, section, timeIn, timeOut] = rowStr.split(',').map(s => s.replace(/"/g, ''));
+                table += `<tr class="border-t border-white/10"><td class="p-3">${no}</td><td class="p-3">${name}</td><td class="p-3">${section}</td><td class="p-3">${timeIn || '-'}</td><td class="p-3">${timeOut || '-'}</td></tr>`;
+            });
+            table += '</tbody></table>';
+            return table;
+        }
+
+        function generateWeeklyReportView(date) {
+            const data = generateWeeklyReport(date).split('\n').slice(2); // Get data rows from CSV function
+            let table = '<table class="w-full text-left text-sm"><thead><tr class="text-blue-100 uppercase text-xs font-semibold"><th class="p-3">#</th><th class="p-3">Name</th><th class="p-3">Section</th><th class="p-3">Present</th><th class="p-3">Absent</th></tr></thead><tbody>';
+            if (data.length === 0 || (data.length === 1 && data[0] === '')) {
+                return '<p class="p-4 text-center text-white/50">No attendance records for this week.</p>';
+            }
+            data.forEach(rowStr => {
+                if (!rowStr) return;
+                const [no, name, section, present, absent] = rowStr.split(',').map(s => s.replace(/"/g, ''));
+                table += `<tr class="border-t border-white/10"><td class="p-3">${no}</td><td class="p-3">${name}</td><td class="p-3">${section}</td><td class="p-3">${present}</td><td class="p-3">${absent}</td></tr>`;
+            });
+            table += '</tbody></table>';
+            return table;
+        }
+
+        function generateMonthlyReportView(date) {
+            // For monthly view, we'll use the same format as weekly to fit mobile screens
+            const year = date.getFullYear();
+            const month = date.getMonth();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const today = new Date();
+            
+            let table = '<table class="w-full text-left text-sm"><thead><tr class="text-blue-100 uppercase text-xs font-semibold"><th class="p-3">#</th><th class="p-3">Name</th><th class="p-3">Section</th><th class="p-3">Present</th><th class="p-3">Absent</th></tr></thead><tbody>';
+
+            const learners = store.learners.sort((a, b) => a.name.localeCompare(b.name));
+            if (learners.length === 0) {
+                return '<p class="p-4 text-center text-white/50">No learners in the database.</p>';
+            }
+
+            learners.forEach((learner, i) => {
+                const rowData = generateMonthlyLearnerRow(learner, i + 1, year, month, daysInMonth).split(',');
+                const name = rowData[1].replace(/"/g, '');
+                const section = rowData[3].replace(/"/g, '');
+                const present = rowData[rowData.length - 2];
+                const absent = rowData[rowData.length - 1];
+                table += `<tr class="border-t border-white/10"><td class="p-3">${i + 1}</td><td class="p-3">${name}</td><td class="p-3">${section}</td><td class="p-3">${present}</td><td class="p-3">${absent}</td></tr>`;
+            });
+            table += '</tbody></table>';
+            return table;
+        }
+
+        function clearOtherFilters(activeFilterId) {
+            const filters = ['student-report-date', 'student-report-week', 'student-report-month'];
+            filters.forEach(id => {
+                if (id !== activeFilterId) {
+                    document.getElementById(id).value = '';
+                }
+            });
+        }
+
+        function getStudentLogs(studentId) {
+            if (!studentId) {
+                alert("Please select a student to track.");
+                return null;
+            }
+            const learner = store.learners.find(l => l.id === studentId);
+            if (!learner) return null;
+
+            const sectionFilter = document.getElementById('report-section-selector').value;
+
+            let studentLogs = store.logs.filter(log => 
+                log.name === learner.name
+            );
+
+            // Further filter by section if one is selected
+            if (sectionFilter !== 'all') studentLogs = studentLogs.filter(log => log.section === sectionFilter);
+
+            // Apply filters
+            const dateFilter = document.getElementById('student-report-date').value;
+            const weekFilter = document.getElementById('student-report-week').value;
+            const monthFilter = document.getElementById('student-report-month').value;
+
+            if (dateFilter) {
+                const targetDate = new Date(dateFilter + 'T00:00:00').toLocaleDateString();
+                studentLogs = studentLogs.filter(log => log.date === targetDate);                
+            } else if (weekFilter) {
+                const [year, week] = weekFilter.split('-W');
+                const startDate = new Date(year, 0, 1 + (week - 1) * 7);
+                startDate.setDate(startDate.getDate() - startDate.getDay());
+                const endDate = new Date(startDate);
+                endDate.setDate(startDate.getDate() + 6);
+                studentLogs = studentLogs.filter(log => {                    
+                    const logDate = new Date(log.date);
+                    return logDate >= startDate && logDate <= endDate;
+                });
+            } else if (monthFilter) {
+                const targetDate = new Date(monthFilter + '-02');
+                const year = targetDate.getFullYear();
+                const month = targetDate.getMonth();
+                studentLogs = studentLogs.filter(log => new Date(log.date).getFullYear() === year && new Date(log.date).getMonth() === month);
+            }
+
+            let title = `Attendance for ${learner.name}`;
+            if (sectionFilter !== 'all') title += ` in ${sectionFilter}`;
+
+            return { logs: studentLogs.reverse(), title: title, learner: learner };
+        }
+
+        function viewStudentReport() {
+            const studentId = document.getElementById('report-student-select').value;
+            const reportData = getStudentLogs(studentId);
+            if (!reportData) return;
+
+            let table = `<table class="w-full text-left text-sm"><thead><tr class="text-blue-100 uppercase text-xs font-semibold"><th class="p-3">Date</th><th class="p-3">Time</th><th class="p-3 text-right">Status</th></tr></thead><tbody>`;
+            if (reportData.logs.length === 0) {
+                table += `<tr><td colspan="3" class="p-4 text-center text-white/50">No attendance records for this student.</td></tr>`;
+            } else {
+                reportData.logs.forEach(log => {
+                    const badge = log.type === 'out' ? '<span class="bg-orange-500/20 text-orange-300 text-[10px] px-2 py-1 rounded-full uppercase font-bold">OUT</span>' : '<span class="bg-green-500/20 text-green-300 text-[10px] px-2 py-1 rounded-full uppercase font-bold">IN</span>';
+                    table += `<tr class="border-t border-white/10"><td class="p-3">${log.date}</td><td class="p-3 font-mono text-white/70">${log.time}</td><td class="p-3 text-right">${badge}</td></tr>`;
+                });
+            }
+            table += '</tbody></table>';
+
+            document.getElementById('report-view-title').innerText = reportData.title;
+            document.getElementById('report-view-content').innerHTML = table;
+            document.getElementById('all-logs-container').classList.add('hidden');
+            document.getElementById('report-view-container').classList.remove('hidden');
+        }
+
+        function downloadStudentReport() {
+            const studentId = document.getElementById('report-student-select').value;
+            const reportData = getStudentLogs(studentId);
+            if (!reportData) return;
+
+            let csvContent = `Attendance Report for ${reportData.learner.name}\n`;
+            csvContent += `Section: ${reportData.learner.section}\n`;
+            csvContent += `Report Title: ${reportData.title}\n\n`;
+            csvContent += "Date,Time,Status\n";
+
+            reportData.logs.forEach(log => {
+                const row = [log.date, log.time, log.type.toUpperCase()];
+                csvContent += row.map(sanitizeCsvField).join(',') + '\n';
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `attendance_${reportData.learner.name.replace(/\s/g, '_')}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            setMode('in'); // Set initial mode
+            navSwitch('scan'); // Start on scan view
+        });
     </script>
 </body>
 
