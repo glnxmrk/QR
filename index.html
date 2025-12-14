@@ -996,19 +996,25 @@
         }
 
         function exportLogs() {
+            const sectionFilter = document.getElementById('report-section-selector').value;
+
+            const logsToExport = sectionFilter !== 'all'
+                ? store.logs.filter(l => l.section === sectionFilter)
+                : store.logs;
+
             let csvContent = "Date,Time,Name,Section,Type\n";
-            const csvRows = store.logs.map(l => {
+            const csvRows = logsToExport.map(l => {
                 const row = [l.date, l.time, l.name, l.section, l.type];
                 return row.map(sanitizeCsvField).join(',');
             });
 
             csvContent += csvRows.join('\n');
-
+            const filename = sectionFilter !== 'all' ? `sjisecure_logs_${sectionFilter}.csv` : "sjisecure_all_logs.csv";
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = "sjisecure_all_logs.csv";
+            a.download = filename;
             document.body.appendChild(a); // Append to body to ensure it works
             a.click();
             document.body.removeChild(a); // Clean up
