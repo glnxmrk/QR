@@ -1670,25 +1670,4 @@
     </script>
 </body>
 
-</html>     URL.revokeObjectURL(url);
-        }
-
-        // --- INITIALIZATION ---
-        document.addEventListener('DOMContentLoaded', () => {
-            if (store.auth.username) {
-                // User has an account, show login view
-                switchLoginView('login');
-            } else {
-                // No account exists, force signup view
-                switchLoginView('signup');
-            }
-        });
-
-        function initialize_app() {
-            setMode('in'); // Set initial mode
-            navSwitch('scan'); // Start on scan view
-        }
-    </script>
-</body>
-
 </html>
