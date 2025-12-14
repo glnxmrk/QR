@@ -952,7 +952,7 @@
             store.currentCamera = mode;
 
             scanner = new Html5Qrcode("reader");
-            const config = { fps: 10, qrbox: { width: 300, height: 300 } };
+            const config = { fps: 10 }; // No qrbox, use full viewfinder
 
             try {
                 await scanner.start(
@@ -1042,16 +1042,12 @@
                     date: dateStr
                 });
 
-                // Construct SMS Link
-                const link = `sms:${data.p}?body=${encodeURIComponent(msg)}`;
-
-                // Show toast & Redirect
-                logFeedback("Opening SMS...", "info");
-
-                // We use a slight delay so the UI updates first
-                setTimeout(() => {
-                    window.location.href = link;
-                }, 100);
+                // Log feedback with an action button to send the SMS
+                const smsAction = {
+                    label: 'Send SMS',
+                    link: `sms:${data.p}?body=${encodeURIComponent(msg)}`
+                };
+                logFeedback(`SMS ready for ${data.n}`, "info", smsAction);
             } else if (store.settings.sendSms && !data.p) {
                 logFeedback("No parent number linked", "warning");
             }
@@ -1063,7 +1059,7 @@
             });
         }
 
-        function logFeedback(msg, type) {
+        function logFeedback(msg, type, action = null) {
             const c = document.getElementById('live-feedback');
             const div = document.createElement('div'); 
 
@@ -1081,6 +1077,13 @@
                 color = "bg-yellow-500/20 text-yellow-200 border-yellow-500/50";
             }
 
+            let actionHtml = '';
+            if (action) {
+                actionHtml = `<div class="mt-2 pt-2 border-t border-white/10">
+                    <a href="${action.link}" class="bg-white/10 hover:bg-white/20 text-white font-bold text-xs py-2 px-3 rounded-lg transition-colors">${action.label}</a>
+                </div>`;
+            }
+
             div.className = `glass-panel ${color} border-l-4 p-4 rounded-xl flex items-center gap-3 animate-slide-in-right`;
             div.innerHTML = `
                 <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center shrink-0">
@@ -1089,6 +1092,7 @@
                 <div>
                      <p class="text-sm font-medium">${msg}</p>
                      <p class="text-[10px] opacity-60 uppercase tracking-wide">${new Date().toLocaleTimeString()}</p>
+                     ${actionHtml}
                 </div>
             `;
 
