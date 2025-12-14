@@ -392,6 +392,47 @@
 
     <!-- MODALS -->
 
+    <!-- Login Modal -->
+    <div id="modal-login" class="fixed inset-0 bg-slate-900 z-[100] flex items-center justify-center p-4">
+        <div class="glass-panel bg-slate-800/50 rounded-2xl w-full max-w-sm p-6 transform transition-all shadow-2xl border-white/20">
+            <!-- Logo and Name -->
+            <div class="flex flex-col items-center mb-6">
+                <div class="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center mb-3 border border-white/20">
+                    <i class="fa-solid fa-shield-halved text-3xl text-white"></i>
+                </div>
+                <h1 class="font-bold text-2xl leading-tight">SJI<span class="text-cyan-300">Secure</span></h1>
+            </div>
+
+            <!-- Sign-up View -->
+            <div id="login-view-signup">
+                <h3 class="text-xl font-bold mb-1 text-white">Create Account</h3>
+                <p class="text-sm text-white/50 mb-4">A one-time secret code is required.</p>
+                <form onsubmit="handleSignup(event)" class="space-y-4">
+                    <input type="text" id="signup-name" required placeholder="Your Name" autocomplete="username" class="glass-input w-full p-3 rounded-xl placeholder-white/30">
+                    <input type="password" id="signup-password" required placeholder="Create Password" autocomplete="new-password" class="glass-input w-full p-3 rounded-xl placeholder-white/30">
+                    <input type="password" id="signup-password-confirm" required placeholder="Confirm Password" autocomplete="new-password" class="glass-input w-full p-3 rounded-xl placeholder-white/30">
+                    <input type="password" id="signup-secret" required placeholder="Secret Code" autocomplete="off" class="glass-input w-full p-3 rounded-xl placeholder-white/30">
+                    <button type="submit" class="w-full bg-cyan-500 hover:bg-cyan-400 py-3 rounded-xl font-bold text-white shadow-lg transition-transform active:scale-95">Create Account</button>
+                </form>
+                <p class="text-center text-xs text-white/40 mt-4">Already have an account? <button onclick="switchLoginView('login')" class="font-bold text-cyan-300 hover:text-cyan-200">Log In</button></p>
+            </div>
+
+            <!-- Login View -->
+            <div id="login-view-login" class="hidden">
+                 <h3 class="text-xl font-bold mb-1 text-white text-center">Welcome Back</h3>
+                 <p id="login-username" class="text-center font-bold text-2xl text-cyan-300 my-4"></p>
+                 <form onsubmit="handleLogin(event)" class="space-y-4">
+                    <input type="password" id="login-password" required placeholder="Password" autocomplete="current-password" class="glass-input w-full p-3 rounded-xl placeholder-white/30">
+                    <button type="submit" class="w-full bg-cyan-500 hover:bg-cyan-400 py-3 rounded-xl font-bold text-white shadow-lg transition-transform active:scale-95">Log In</button>
+                 </form>
+                 <div class="text-center mt-4">
+                    <button onclick="switchLoginView('signup')" class="w-full py-2 rounded-xl font-medium text-white/60 hover:bg-white/10 transition-colors text-sm">Not you? Create Account</button>
+                 </div>
+            </div>
+        </div>
+    </div>
+
+
     <!-- Add Learner Modal -->
     <div id="modal-add-learner"
         class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
@@ -415,8 +456,7 @@
                 <div class="flex gap-3 pt-2">
                     <button type="button" onclick="toggleModal('modal-add-learner')"
                         class="flex-1 py-3 rounded-xl font-medium text-white/60 hover:bg-white/10 transition-colors">Cancel</button>
-                    <button type="submit"
-                        class="flex-1 bg-cyan-500 hover:bg-cyan-400 py-3 rounded-xl font-bold text-white shadow-lg transition-transform active:scale-95">Save</button>
+                    <button type="submit" class="flex-1 bg-cyan-500 hover:bg-cyan-400 py-3 rounded-xl font-bold text-white shadow-lg transition-transform active:scale-95">Save</button>
                 </div>
             </form>
         </div>
@@ -530,6 +570,12 @@
                 templateIn: "Good day! Your child {name} has arrived at school at {time}.",
                 templateOut: "Good day! Your child {name} has left school at {time}."
             },
+            auth: JSON.parse(localStorage.getItem('auth')) || {
+                isLoggedIn: false,
+                username: null,
+                passwordHash: null,
+                secretVersion: '1.0' // To force re-login on future updates
+            },
             profile: JSON.parse(localStorage.getItem('profile')) || {
                 name: '',
                 school: '',
@@ -545,6 +591,7 @@
             localStorage.setItem('learners', JSON.stringify(store.learners));
             localStorage.setItem('logs', JSON.stringify(store.logs));
             localStorage.setItem('settings', JSON.stringify(store.settings));
+            localStorage.setItem('auth', JSON.stringify(store.auth));
             localStorage.setItem('profile', JSON.stringify(store.profile));
         };
 
@@ -584,7 +631,7 @@
             const bOut = document.getElementById('btn-mode-out');
 
             if (m === 'in') {
-                ind.style.left = '4px';
+                ind.style.transform = 'translateX(0)';
                 ind.classList.remove('bg-orange-500');
                 ind.classList.add('bg-cyan-500');
                 bIn.classList.remove('text-white/50');
@@ -592,7 +639,7 @@
                 bOut.classList.add('text-white/50');
                 bOut.classList.remove('text-white');
             } else {
-                ind.style.left = 'calc(50% + 0px)';
+                ind.style.transform = 'translateX(calc(100% + 8px))';
                 ind.classList.remove('bg-cyan-500');
                 ind.classList.add('bg-orange-500');
                 bIn.classList.add('text-white/50');
@@ -637,6 +684,102 @@
             save();
             toggleModal('modal-settings');
             alert("Settings saved!");
+        }
+
+        // --- LOGIN / AUTH ---
+        const SECRET_CODE = "ADMIN-SS-2025!";
+        
+        // Securely hash text using the browser's built-in crypto API
+        async function hashText(text) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(text);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        async function handleSignup(event) {
+            event.preventDefault();
+            const nameInput = document.getElementById('signup-name');
+            const secretInput = document.getElementById('signup-secret');
+            const passwordInput = document.getElementById('signup-password');
+            const passwordConfirmInput = document.getElementById('signup-password-confirm');
+
+            if (secretInput.value.trim() !== SECRET_CODE) {
+                alert("Incorrect Secret Code. Please try again.");
+                secretInput.value = '';
+                return;
+            }
+
+            if (passwordInput.value !== passwordConfirmInput.value) {
+                alert("Passwords do not match. Please try again.");
+                passwordInput.value = '';
+                passwordConfirmInput.value = '';
+                return;
+            }
+
+            if (passwordInput.value.length < 6) {
+                alert("Password must be at least 6 characters long.");
+                return;
+            }
+
+            const passwordHash = await hashText(passwordInput.value);
+            const username = nameInput.value.trim();
+
+            store.auth.username = username;
+            store.auth.passwordHash = passwordHash;
+            store.auth.isLoggedIn = true;
+            store.profile.name = username; // Also save to profile
+            save();
+            
+            document.getElementById('modal-login').classList.add('hidden');
+            initialize_app();
+            
+            // Clear fields for security
+            nameInput.value = '';
+            secretInput.value = '';
+            passwordInput.value = '';
+            passwordConfirmInput.value = '';
+        }
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            const passwordInput = document.getElementById('login-password');
+            const enteredPasswordHash = await hashText(passwordInput.value);
+
+            if (enteredPasswordHash !== store.auth.passwordHash) {
+                alert("Incorrect password. Please try again.");
+                passwordInput.value = '';
+                return;
+            }
+
+            store.auth.isLoggedIn = true;
+            // No need to save auth here, as it's temporary for the session
+            document.getElementById('modal-login').classList.add('hidden');
+            passwordInput.value = ''; // Clear field for security
+            initialize_app();
+        }
+
+        function switchLoginView(view) {
+            const signupView = document.getElementById('login-view-signup');
+            const loginView = document.getElementById('login-view-login');
+            const nameInput = document.getElementById('signup-name');
+            const passwordInput = document.getElementById('signup-password');
+            const passwordConfirmInput = document.getElementById('signup-password-confirm');
+
+            if (view === 'login' && store.auth.username) {
+                signupView.classList.add('hidden');
+                loginView.classList.remove('hidden');
+                document.getElementById('login-username').innerText = store.auth.username;
+            } else {
+                loginView.classList.add('hidden');
+                signupView.classList.remove('hidden');
+                // Clear fields when switching back to signup
+                nameInput.value = '';
+                passwordInput.value = '';
+                passwordConfirmInput.value = '';
+                document.getElementById('signup-secret').value = '';
+            }
         }
 
         // --- PROFILE ---
@@ -922,14 +1065,14 @@
 
         function logFeedback(msg, type) {
             const c = document.getElementById('live-feedback');
-            const div = document.createElement('div');
+            const div = document.createElement('div'); 
 
             let icon = "fa-circle-info";
             let color = "bg-blue-500/20 text-blue-200 border-blue-500/50"; // default info
 
             if (type === 'success') {
                 icon = "fa-check";
-                color = "bg-green-500/20 text-green-200 border-green-500/50";
+                color = "bg-cyan-500/20 text-cyan-200 border-cyan-500/50";
             } else if (type === 'error') {
                 icon = "fa-xmark";
                 color = "bg-red-500/20 text-red-200 border-red-500/50";
@@ -957,7 +1100,7 @@
         // --- LOGS ---
         function renderLogs() {
             const c = document.getElementById('logs-list');
-            const sectionFilter = document.getElementById('report-section-selector').value;
+            const sectionFilter = document.getElementById('report-section-selector') ? document.getElementById('report-section-selector').value : 'all';
 
             // Filter logs by selected section
             const logs = sectionFilter !== 'all'
@@ -971,7 +1114,7 @@
 
             // Populate student select dropdown
             const studentSelect = document.getElementById('report-student-select');
-            // Only repopulate if it's empty to avoid flicker
+            // Only repopulate if it's empty to avoid flicker on re-renders
             if (studentSelect.options.length <= 1) {
                 store.learners.sort((a, b) => a.name.localeCompare(b.name)).forEach(learner => {
                     const option = document.createElement('option');
@@ -984,7 +1127,7 @@
                 const tr = document.createElement('tr');
                 const badge = l.type === 'out'
                     ? '<span class="bg-orange-500/20 text-orange-300 text-[10px] px-2 py-1 rounded-full uppercase font-bold">OUT</span>'
-                    : '<span class="bg-green-500/20 text-green-300 text-[10px] px-2 py-1 rounded-full uppercase font-bold">IN</span>';
+                    : '<span class="bg-cyan-500/20 text-cyan-300 text-[10px] px-2 py-1 rounded-full uppercase font-bold">IN</span>';
 
                 tr.innerHTML = `
                     <td class="p-3 font-mono text-white/70">${l.time}</td>
@@ -996,7 +1139,7 @@
         }
 
         function exportLogs() {
-            const sectionFilter = document.getElementById('report-section-selector').value;
+            const sectionFilter = document.getElementById('report-section-selector') ? document.getElementById('report-section-selector').value : 'all';
 
             const logsToExport = sectionFilter !== 'all'
                 ? store.logs.filter(l => l.section === sectionFilter)
@@ -1104,7 +1247,7 @@
 
         function generateDailyReport(date) {
             const dateStr = date.toLocaleDateString();
-            const sectionFilter = document.getElementById('report-section-selector').value;
+            const sectionFilter = document.getElementById('report-section-selector') ? document.getElementById('report-section-selector').value : 'all';
             if (sectionFilter === 'all') { alert("Please select a specific section for this report."); return ""; }
 
             const dailyLogs = store.logs.filter(l => 
@@ -1146,7 +1289,7 @@
 
             let csv = `Weekly Attendance Report - ${startDate.toLocaleDateString()} to ${endDate.toLocaleDateString()}\n\n`;
             csv += 'No.,Name,Section,Days Present,Days Absent\n';
-            const sectionFilter = document.getElementById('report-section-selector').value;
+            const sectionFilter = document.getElementById('report-section-selector') ? document.getElementById('report-section-selector').value : 'all';
             if (sectionFilter === 'all') { alert("Please select a specific section for this report."); return ""; }
 
             const learnerStats = {};
@@ -1195,7 +1338,7 @@
             const month = date.getMonth();
             const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-            const sectionFilter = document.getElementById('report-section-selector').value;
+            const sectionFilter = document.getElementById('report-section-selector') ? document.getElementById('report-section-selector').value : 'all';
             if (sectionFilter === 'all') { alert("Please select a specific section for this report."); return ""; }
 
             const monthName = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
@@ -1347,7 +1490,7 @@
             let table = '<table class="w-full text-left text-sm"><thead><tr class="text-blue-100 uppercase text-xs font-semibold"><th class="p-3">#</th><th class="p-3">Name</th><th class="p-3">Section</th><th class="p-3">Time In</th><th class="p-3">Time Out</th></tr></thead><tbody>';
             if (data.length === 0 || (data.length === 1 && data[0] === '')) {
                 return '<p class="p-4 text-center text-white/50">No attendance records for this day.</p>';
-            }
+            } 
             data.forEach(rowStr => {
                 if (!rowStr) return;
                 const [no, name, section, timeIn, timeOut] = rowStr.split(',').map(s => s.replace(/"/g, ''));
@@ -1381,7 +1524,7 @@
             
             let table = '<table class="w-full text-left text-sm"><thead><tr class="text-blue-100 uppercase text-xs font-semibold"><th class="p-3">#</th><th class="p-3">Name</th><th class="p-3">Section</th><th class="p-3">Present</th><th class="p-3">Absent</th></tr></thead><tbody>';
 
-            const sectionFilter = document.getElementById('report-section-selector').value;
+            const sectionFilter = document.getElementById('report-section-selector') ? document.getElementById('report-section-selector').value : 'all';
             if (sectionFilter === 'all') {
                 return '<p class="p-4 text-center text-white/50">Please select a section to view this report.</p>';
             }
@@ -1421,7 +1564,7 @@
             const learner = store.learners.find(l => l.id === studentId);
             if (!learner) return null;
 
-            const sectionFilter = document.getElementById('report-section-selector').value;
+            const sectionFilter = document.getElementById('report-section-selector') ? document.getElementById('report-section-selector').value : 'all';
 
             let studentLogs = store.logs.filter(log => 
                 log.name === learner.name
@@ -1471,7 +1614,7 @@
                 table += `<tr><td colspan="3" class="p-4 text-center text-white/50">No attendance records for this student.</td></tr>`;
             } else {
                 reportData.logs.forEach(log => {
-                    const badge = log.type === 'out' ? '<span class="bg-orange-500/20 text-orange-300 text-[10px] px-2 py-1 rounded-full uppercase font-bold">OUT</span>' : '<span class="bg-green-500/20 text-green-300 text-[10px] px-2 py-1 rounded-full uppercase font-bold">IN</span>';
+                    const badge = log.type === 'out' ? '<span class="bg-orange-500/20 text-orange-300 text-[10px] px-2 py-1 rounded-full uppercase font-bold">OUT</span>' : '<span class="bg-cyan-500/20 text-cyan-300 text-[10px] px-2 py-1 rounded-full uppercase font-bold">IN</span>';
                     table += `<tr class="border-t border-white/10"><td class="p-3">${log.date}</td><td class="p-3 font-mono text-white/70">${log.time}</td><td class="p-3 text-right">${badge}</td></tr>`;
                 });
             }
@@ -1511,9 +1654,40 @@
 
         // --- INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', () => {
+            if (store.auth.username) {
+                // User has an account, show login view
+                switchLoginView('login');
+            } else {
+                // No account exists, force signup view
+                switchLoginView('signup');
+            }
+        });
+
+        function initialize_app() {
             setMode('in'); // Set initial mode
             navSwitch('scan'); // Start on scan view
+        }
+    </script>
+</body>
+
+</html>     URL.revokeObjectURL(url);
+        }
+
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            if (store.auth.username) {
+                // User has an account, show login view
+                switchLoginView('login');
+            } else {
+                // No account exists, force signup view
+                switchLoginView('signup');
+            }
         });
+
+        function initialize_app() {
+            setMode('in'); // Set initial mode
+            navSwitch('scan'); // Start on scan view
+        }
     </script>
 </body>
 
