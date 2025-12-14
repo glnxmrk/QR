@@ -1173,10 +1173,14 @@
                 }
             }
 
-            store.learners.sort((a, b) => a.name.localeCompare(b.name)).forEach((learner, i) => {
+            const filteredLearners = store.learners
+                .filter(l => l.section === sectionFilter)
+                .sort((a, b) => a.name.localeCompare(b.name));
+
+            filteredLearners.forEach((learner, i) => {
                 const stats = learnerStats[learner.name];
                 const present = stats ? stats.days.size : 0;
-                const absent = businessDays - present;
+                const absent = Math.max(0, businessDays - present);
                 const row = [i + 1, learner.name, learner.section, present, absent]
                     .map(sanitizeCsvField)
                     .join(',');
@@ -1198,8 +1202,12 @@
             let csv = `Monthly Attendance Report - ${monthName}\n\n`;
 
             // Separate and sort learners by gender
-            const maleLearners = store.learners.filter(l => l.gender === 'Male').sort((a, b) => a.name.localeCompare(b.name));
-            const femaleLearners = store.learners.filter(l => l.gender === 'Female').sort((a, b) => a.name.localeCompare(b.name));
+            const maleLearners = store.learners
+                .filter(l => l.section === sectionFilter && l.gender === 'Male')
+                .sort((a, b) => a.name.localeCompare(b.name));
+            const femaleLearners = store.learners
+                .filter(l => l.section === sectionFilter && l.gender === 'Female')
+                .sort((a, b) => a.name.localeCompare(b.name));
 
             // Generate header
             csv += 'No.,Name,Gender,Section,';
@@ -1268,7 +1276,9 @@
                 }
             }
 
-            const daysAbsent = (Array.from({length: daysInMonth}, (_, i) => new Date(year, month, i + 1)).filter(d => d.getDay() > 0 && d.getDay() < 6 && d < today).length) - daysPresent;
+            const businessDaysInPast = Array.from({length: daysInMonth}, (_, i) => new Date(year, month, i + 1))
+                .filter(d => d.getDay() > 0 && d.getDay() < 6 && d < today).length;
+            const daysAbsent = Math.max(0, businessDaysInPast - daysPresent);
             rowParts.push(daysPresent);
             rowParts.push(daysAbsent);
             const row = rowParts.join(',') + '\n';
@@ -1371,13 +1381,19 @@
             
             let table = '<table class="w-full text-left text-sm"><thead><tr class="text-blue-100 uppercase text-xs font-semibold"><th class="p-3">#</th><th class="p-3">Name</th><th class="p-3">Section</th><th class="p-3">Present</th><th class="p-3">Absent</th></tr></thead><tbody>';
 
-            const learners = store.learners.sort((a, b) => a.name.localeCompare(b.name));
+            const sectionFilter = document.getElementById('report-section-selector').value;
+            if (sectionFilter === 'all') {
+                return '<p class="p-4 text-center text-white/50">Please select a section to view this report.</p>';
+            }
+
+            const learners = store.learners.filter(l => l.section === sectionFilter).sort((a, b) => a.name.localeCompare(b.name));
             if (learners.length === 0) {
                 return '<p class="p-4 text-center text-white/50">No learners in the database.</p>';
             }
 
             learners.forEach((learner, i) => {
-                const rowData = generateMonthlyLearnerRow(learner, i + 1, year, month, daysInMonth).split(',');
+                // Pass the section filter to the row generator
+                const rowData = generateMonthlyLearnerRow(learner, i + 1, year, month, daysInMonth, sectionFilter).split(',');
                 const name = rowData[1].replace(/"/g, '');
                 const section = rowData[3].replace(/"/g, '');
                 const present = rowData[rowData.length - 2];
