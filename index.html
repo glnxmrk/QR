@@ -1042,12 +1042,16 @@
                     date: dateStr
                 });
 
-                // Log feedback with an action button to send the SMS
-                const smsAction = {
-                    label: 'Send SMS',
-                    link: `sms:${data.p}?body=${encodeURIComponent(msg)}`
-                };
-                logFeedback(`SMS ready for ${data.n}`, "info", smsAction);
+                // Construct SMS Link
+                const link = `sms:${data.p}?body=${encodeURIComponent(msg)}`;
+
+                // Show feedback and then redirect
+                logFeedback("Opening SMS...", "info");
+
+                // Use a slight delay so the UI updates before the browser switches to the messaging app
+                setTimeout(() => {
+                    window.location.href = link;
+                }, 500);
             } else if (store.settings.sendSms && !data.p) {
                 logFeedback("No parent number linked", "warning");
             }
