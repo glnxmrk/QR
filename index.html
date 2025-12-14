@@ -569,7 +569,10 @@
             setTimeout(() => target.classList.add('translate-x-0'), 10);
 
             if (viewId === 'learners') renderLearners();
-            if (viewId === 'logs') renderLogs();
+            if (viewId === 'logs') {
+                populateSectionSelector();
+                renderLogs();
+            }
             if (viewId === 'profile') renderProfile();
         }
 
@@ -956,8 +959,6 @@
             const c = document.getElementById('logs-list');
             const sectionFilter = document.getElementById('report-section-selector').value;
 
-            populateSectionSelector();
-
             // Filter logs by selected section
             const logs = sectionFilter !== 'all'
                 ? [...store.logs].filter(l => l.section === sectionFilter).reverse() 
@@ -1272,6 +1273,7 @@
         // --- SECTION SELECTOR ---
         function populateSectionSelector() {
             const selector = document.getElementById('report-section-selector');
+            if (selector.options.length > 1) return; // Already populated
             selector.innerHTML = '<option value="all">-- All Sections --</option>';
             const sections = [...new Set(store.learners.map(l => l.section))].sort();
             sections.forEach(s => {
