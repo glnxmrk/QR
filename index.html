@@ -31,6 +31,8 @@
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <!-- QR Code Generator -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- SheetJS (Excel Export) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
         // Unregister Service Worker to resolve 404 errors and disable offline mode
         if ('serviceWorker' in navigator) {
@@ -122,7 +124,7 @@
             </div>
             <div>
                 <h1 class="font-bold text-lg leading-tight">SJIS<span class="text-cyan-300">Secure</span></h1>
-                <p class="text-xs text-blue-200">School Attendance Monitoring System</p>
+                <p class="text-xs text-blue-200">System Ready</p>
             </div>
         </div>
         <button onclick="toggleModal('modal-settings')"
@@ -1568,8 +1570,9 @@
                 const monthValue = document.getElementById('report-monthly-month').value;
                 if (!monthValue) { alert("Please select a month for the monthly report."); return; }
                 targetDate = new Date(monthValue + '-02'); // Use day 2 to avoid timezone issues
-                csv = generateMonthlyReport(targetDate);
-                filename = `monthly_report_${targetDate.getFullYear()}-${(targetDate.getMonth() + 1).toString().padStart(2, '0')}.csv`;
+                // Switch to Excel generation
+                generateMonthlyExcel(targetDate);
+                return; // Exit CSV flow
             }
 
             if (!csv) return;
@@ -1582,6 +1585,184 @@
             a.click();
             document.body.removeChild(a); // Clean up
             URL.revokeObjectURL(url); // Release memory
+        }
+
+        // --- EXCEL GENERATION ---
+        function generateMonthlyExcel(date) {
+            const year = date.getFullYear();
+            const month = date.getMonth();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const monthName = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+            const sectionFilter = document.getElementById('report-section-selector') ? document.getElementById('report-section-selector').value : 'all';
+            if (sectionFilter === 'all') { alert("Please select a specific section."); return; }
+
+            // Prepare Data Array (Array of Arrays)
+            const wsData = [];
+
+            // SF2 Header
+            wsData.push(["School Form 2 (SF2) Daily Attendance Report of Learners"]);
+            wsData.push(["School Name", store.profile.school || 'Not Set']);
+            wsData.push(["Grade Level and Section", sectionFilter]);
+            wsData.push(["For the Month of", monthName]);
+            wsData.push([]); // Empty row
+
+            // Header Row (Days)
+            const headerRow = ["No.", "LEARNER'S NAME"];
+            for (let d = 1; d <= daysInMonth; d++) {
+                headerRow.push(d);
+            }
+            headerRow.push("Total ABSENT");
+            headerRow.push("Total PRESENT");
+            wsData.push(headerRow);
+
+            // Sub-header Row (Days of Week)
+            const subHeader = ["", ""];
+            const daysOfWeek = ['Su', 'M', 'T', 'W', 'Th', 'F', 'S'];
+            const validDates = new Set();
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dObj = new Date(year, month, d);
+                subHeader.push(daysOfWeek[dObj.getDay()]);
+                validDates.add(dObj.toLocaleDateString());
+            }
+            wsData.push(subHeader);
+
+            // --- DATA COLLECTION ---
+            // 1. Get Enrolled Learners
+            const enrolled = store.learners.filter(l => (l.section || '').trim().toLowerCase() === sectionFilter.trim().toLowerCase());
+
+            // 2. Get Unregistered Learners (Scanned but not Enrolled)
+            const enrolledNames = new Set(enrolled.map(l => (l.name || '').toLowerCase()));
+            const unregistered = [];
+            store.logs.forEach(log => {
+                if ((log.section || '').trim().toLowerCase() === sectionFilter.trim().toLowerCase() && validDates.has(log.date)) {
+                    if (!enrolledNames.has((log.name || '').toLowerCase())) {
+                        // Add only distinct unregistered
+                        if (!unregistered.find(u => u.name === log.name)) {
+                            unregistered.push({ name: log.name, gender: 'Check Gender' }); // Default gender marker
+                        }
+                    }
+                }
+            });
+
+            // 3. Merge All
+            const allLearners = [...enrolled, ...unregistered];
+
+            // 4. Categorize (Strict 2 Categories: Male, Female)
+            // If gender is missing or not 'female', default to Male (or 'Check Gender' implied Male list)
+            // This is to satisfy "Only 2 categories".
+            const males = [];
+            const females = [];
+
+            allLearners.forEach(l => {
+                const g = (l.gender || '').trim().toLowerCase();
+                if (g === 'female') {
+                    females.push(l);
+                } else {
+                    // Default everyone else to Male list
+                    males.push(l);
+                }
+            });
+
+            // --- SORTING (Last Name) ---
+            const getLastName = (fullName) => {
+                if (!fullName) return '';
+                // Assume "First Last" or "First Middle Last" -> Take last token
+                const parts = fullName.trim().split(/\s+/);
+                return parts[parts.length - 1].toLowerCase();
+            };
+
+            const sortFn = (a, b) => {
+                const lastA = getLastName(a.name);
+                const lastB = getLastName(b.name);
+                return lastA.localeCompare(lastB) || (a.name || '').localeCompare(b.name || '');
+            };
+
+            males.sort(sortFn);
+            females.sort(sortFn);
+
+            // --- HELPER ---
+            const processLearner = (l, index) => {
+                let displayName = (l && l.name) ? String(l.name) : "Unknown Student";
+                // Optionally mark unregistered/genderless in the name for user awareness
+                // if ((l.gender || '') === 'Check Gender') displayName += " (?)"; 
+
+                const row = [index, displayName];
+                let presentCount = 0;
+
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                for (let d = 1; d <= daysInMonth; d++) {
+                    const currentDay = new Date(year, month, d);
+                    const dayOfWeek = currentDay.getDay();
+                    const dateStr = currentDay.toLocaleDateString();
+
+                    if (dayOfWeek === 0 || dayOfWeek === 6) { // Weekend
+                        row.push("");
+                        continue;
+                    }
+
+                    const isPresent = store.logs.some(log =>
+                        log.name === l.name &&
+                        log.date === dateStr &&
+                        log.type === 'in' &&
+                        (log.section || '').trim().toLowerCase() === sectionFilter.trim().toLowerCase()
+                    );
+
+                    if (isPresent) {
+                        row.push("/");
+                        presentCount++;
+                    } else if (currentDay < today) {
+                        row.push("x");
+                    } else {
+                        row.push("");
+                    }
+                }
+
+                const businessDaysInPast = Array.from({ length: daysInMonth }, (_, i) => new Date(year, month, i + 1))
+                    .filter(d => d.getDay() > 0 && d.getDay() < 6 && d < today).length;
+                const absentCount = Math.max(0, businessDaysInPast - presentCount);
+
+                row.push(absentCount);
+                row.push(presentCount);
+                return { row, absentCount, presentCount };
+            };
+
+            // --- GENERATE ROWS ---
+            // Male
+            wsData.push(["MALE LEARNERS"]);
+            let totalMaleAbsences = 0;
+            males.forEach((l, i) => {
+                const res = processLearner(l, i + 1);
+                wsData.push(res.row);
+                totalMaleAbsences += res.absentCount;
+            });
+
+            // Female
+            wsData.push(["FEMALE LEARNERS"]);
+            let totalFemaleAbsences = 0;
+            females.forEach((l, i) => {
+                const res = processLearner(l, males.length + i + 1);
+                wsData.push(res.row);
+                totalFemaleAbsences += res.absentCount;
+            });
+
+            // Footer
+            wsData.push([]);
+            wsData.push(["Summary for the Month"]);
+            wsData.push(["Total Absences", totalMaleAbsences + totalFemaleAbsences]);
+
+            // Create Workbook
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+            // Styling
+            ws['!cols'] = [{ wpx: 150 }, { wch: 30 }]; // Width for Col A (150px) and Name
+
+            XLSX.utils.book_append_sheet(wb, ws, "Attendance");
+            const filename = `SF2_Attendance_${monthName.replace(/ /g, '_')}_${sectionFilter}.xlsx`;
+            XLSX.writeFile(wb, filename);
         }
 
         // --- CSV SANITIZER ---
@@ -1725,7 +1906,13 @@
             let totalMaleAbsences = 0;
             let totalFemaleAbsences = 0;
 
-            csv += `,,,,${Array(daysInMonth).fill('M,T,W,Th,F,S,Su'.split(',')[new Date(year, month, _ + 1).getDay()]).join(',')}\n`; // Day of week row
+            let dayRow = ',,';
+            const daysOfWeek = ['Su', 'M', 'T', 'W', 'Th', 'F', 'S'];
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayIndex = new Date(year, month, day).getDay();
+                dayRow += `${daysOfWeek[dayIndex]},`;
+            }
+            csv += dayRow + '\n';
 
             csv += `MALE LEARNERS (${maleLearners.length})\n`;
             maleLearners.forEach((learner, index) => {
@@ -1764,7 +1951,8 @@
         }
 
         function generateMonthlyLearnerRow(learner, no, year, month, daysInMonth, section) {
-            let rowParts = [no, sanitizeCsvField(learner.name)];
+            const safeName = (learner && learner.name) ? String(learner.name) : "Unknown Student";
+            let rowParts = [no, sanitizeCsvField(safeName)];
 
             let daysPresent = 0;
 
@@ -1972,10 +2160,18 @@
                     return logDate >= startDate && logDate <= endDate;
                 });
             } else if (monthFilter) {
-                const targetDate = new Date(monthFilter + '-02');
+                const targetDate = new Date(monthFilter + '-02'); // Avoid TZ issues
                 const year = targetDate.getFullYear();
                 const month = targetDate.getMonth();
-                studentLogs = studentLogs.filter(log => new Date(log.date).getFullYear() === year && new Date(log.date).getMonth() === month);
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+                // Create a Set of all valid date strings for this month
+                const validDates = new Set();
+                for (let i = 1; i <= daysInMonth; i++) {
+                    validDates.add(new Date(year, month, i).toLocaleDateString());
+                }
+
+                studentLogs = studentLogs.filter(log => validDates.has(log.date));
             }
 
             let title = `Attendance for ${learner.name}`;
