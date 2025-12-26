@@ -1,6 +1,6 @@
 const CACHE_NAME = 'sjisecure-v1';
 const ASSETS = [
-    './app.html',
+    './index.html',
     './manifest.json',
     './icon-192.png',
     './icon-512.png',
