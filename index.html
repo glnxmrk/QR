@@ -134,6 +134,8 @@
     <!-- Main Content Area -->
     <main class="flex-grow relative overflow-hidden">
 
+
+
         <!-- View: SCANNER -->
         <section id="view-scan"
             class="absolute inset-0 p-4 pb-24 overflow-y-auto view-section transition-all duration-300">
@@ -224,10 +226,16 @@
                         <h2 class="text-2xl font-bold">Learners</h2>
                         <p class="text-white/60 text-sm">Manage student database</p>
                     </div>
-                    <button onclick="toggleModal('modal-add-learner')"
-                        class="bg-white text-blue-900 px-4 py-2 rounded-lg font-bold text-sm shadow-lg active:scale-95 transition-all">
-                        <i class="fa-solid fa-plus mr-1"></i> Add
-                    </button>
+                    <div class="flex gap-2">
+                        <button onclick="printAllQRs()"
+                            class="bg-blue-500/20 text-blue-300 px-4 py-2 rounded-lg font-bold text-sm shadow-lg active:scale-95 transition-all border border-blue-500/30">
+                            <i class="fa-solid fa-print mr-1"></i> Print All
+                        </button>
+                        <button onclick="toggleModal('modal-add-learner')"
+                            class="bg-white text-blue-900 px-4 py-2 rounded-lg font-bold text-sm shadow-lg active:scale-95 transition-all">
+                            <i class="fa-solid fa-plus mr-1"></i> Add
+                        </button>
+                    </div>
                 </div>
 
                 <div id="learners-list" class="space-y-3">
@@ -379,13 +387,196 @@
             </div>
         </section>
 
-        <!-- View: PROFILE -->
+        <!-- View: MENU (More) -->
+        <section id="view-menu"
+            class="absolute inset-0 p-4 pb-24 overflow-y-auto view-section translate-x-full transition-all duration-300 hidden">
+            <div class="max-w-md mx-auto space-y-4">
+                <h2 class="text-2xl font-bold mb-4">Menu</h2>
+
+                <!-- Menu Grid -->
+                <div class="grid grid-cols-2 gap-4">
+                    <button onclick="navSwitch('about')"
+                        class="glass-panel p-6 rounded-2xl flex flex-col items-center gap-3 hover:bg-white/5 transition-colors">
+                        <div
+                            class="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-300">
+                            <i class="fa-solid fa-info text-xl"></i>
+                        </div>
+                        <span class="font-bold text-sm">About App</span>
+                    </button>
+                    <button onclick="navSwitch('pricing')"
+                        class="glass-panel p-6 rounded-2xl flex flex-col items-center gap-3 hover:bg-white/5 transition-colors">
+                        <div
+                            class="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-300">
+                            <i class="fa-solid fa-tag text-xl"></i>
+                        </div>
+                        <span class="font-bold text-sm">Pricing</span>
+                    </button>
+                    <button onclick="navSwitch('install')"
+                        class="glass-panel p-6 rounded-2xl flex flex-col items-center gap-3 hover:bg-white/5 transition-colors">
+                        <div
+                            class="w-12 h-12 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-300">
+                            <i class="fa-solid fa-download text-xl"></i>
+                        </div>
+                        <span class="font-bold text-sm">Install Guide</span>
+                    </button>
+                    <button onclick="navSwitch('profile')"
+                        class="glass-panel p-6 rounded-2xl flex flex-col items-center gap-3 hover:bg-white/5 transition-colors">
+                        <div
+                            class="w-12 h-12 rounded-full bg-cyan-500/20 flex items-center justify-center text-cyan-300">
+                            <i class="fa-solid fa-user-gear text-xl"></i>
+                        </div>
+                        <span class="font-bold text-sm">My Profile</span>
+                    </button>
+                </div>
+
+                <!-- Sign In / Log Out (Moved here) -->
+                <div class="glass-panel rounded-2xl p-4 mt-6">
+                    <button onclick="toggleModal('modal-login')" class="w-full flex items-center justify-between p-2">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
+                                <i class="fa-solid fa-right-to-bracket"></i>
+                            </div>
+                            <div class="text-left">
+                                <h4 class="font-bold text-sm">Account Status</h4>
+                                <p class="text-xs text-white/50" id="account-status-text">Not Signed In</p>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-white/30"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- View: ABOUT -->
+        <section id="view-about"
+            class="absolute inset-0 p-4 pb-24 overflow-y-auto view-section translate-x-full transition-all duration-300 hidden">
+            <div class="max-w-md mx-auto space-y-4">
+                <div class="flex items-center gap-3 mb-6">
+                    <button onclick="navSwitch('menu')"
+                        class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                    <h2 class="text-xl font-bold">About SJISecure</h2>
+                </div>
+                <div class="glass-panel rounded-2xl p-6 space-y-4 text-sm text-white/80 leading-relaxed">
+                    <div class="flex justify-center mb-4">
+                        <i class="fa-solid fa-shield-halved text-6xl text-cyan-400"></i>
+                    </div>
+                    <p><strong>SJISecure</strong> is an advanced school attendance monitoring system designed to provide
+                        real-time updates to parents and secure tracking for the school administration.</p>
+                    <p>Built with privacy and efficiency in mind, it uses QR Code technology to quickly log student
+                        entry and exit times, automatically composing SMS notifications for parents.</p>
+                    <div class="border-t border-white/10 pt-4 mt-4">
+                        <p class="text-xs text-center text-white/40">Version 1.2.0 (PWA)</p>
+                        <p class="text-xs text-center text-white/40">&copy; 2025 SJI School Systems</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- View: PRICING -->
+        <section id="view-pricing"
+            class="absolute inset-0 p-4 pb-24 overflow-y-auto view-section translate-x-full transition-all duration-300 hidden">
+            <div class="max-w-md mx-auto space-y-4">
+                <div class="flex items-center gap-3 mb-6">
+                    <button onclick="navSwitch('menu')"
+                        class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                    <h2 class="text-xl font-bold">Pricing Plans</h2>
+                </div>
+
+                <div class="glass-panel rounded-2xl p-6 border border-cyan-500/30 relative overflow-hidden">
+                    <h3 class="text-lg font-bold text-white mb-1">Lifetime Access</h3>
+                    <div class="flex items-baseline gap-1 mb-4">
+                        <span class="text-3xl font-bold text-cyan-300">₱200.00</span>
+                        <span class="text-sm text-white/50">one-time</span>
+                    </div>
+                    <ul class="space-y-2 text-sm text-white/80 mb-6">
+                        <li class="flex items-center gap-2"><i class="fa-solid fa-check text-cyan-400"></i> Unlimited
+                            Students</li>
+                        <li class="flex items-center gap-2"><i class="fa-solid fa-check text-cyan-400"></i> Unlimited
+                            Logs</li>
+                        <li class="flex items-center gap-2"><i class="fa-solid fa-check text-cyan-400"></i> Export Data
+                            (CSV)</li>
+                        <li class="flex items-center gap-2"><i class="fa-solid fa-check text-cyan-400"></i> Priority
+                            Support</li>
+                        <li class="flex items-center gap-2"><i class="fa-solid fa-check text-cyan-400"></i> No Monthly
+                            Fees</li>
+                    </ul>
+                    <a href="https://www.facebook.com/glnnxmrk/" target="_blank"
+                        class="block w-full py-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-white font-bold transition-colors text-center shadow-lg active:scale-95">Contact
+                        the Owner</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- View: INSTALL -->
+        <section id="view-install"
+            class="absolute inset-0 p-4 pb-24 overflow-y-auto view-section translate-x-full transition-all duration-300 hidden">
+            <div class="max-w-md mx-auto space-y-4">
+                <div class="flex items-center gap-3 mb-6">
+                    <button onclick="navSwitch('menu')"
+                        class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                    <h2 class="text-xl font-bold">Installation Guide</h2>
+                </div>
+
+                <div class="glass-panel rounded-2xl p-6 space-y-4">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-brands fa-apple text-2xl text-white"></i>
+                        <h3 class="font-bold">iOS (iPhone/iPad)</h3>
+                    </div>
+                    <ol class="list-decimal list-inside text-sm text-white/70 space-y-2 ml-1">
+                        <li>Open this page in <strong>Safari</strong>.</li>
+                        <li>Tap the <strong>Share</strong> icon (square with arrow up).</li>
+                        <li>Scroll down and tap <strong>"Add to Home Screen"</strong>.</li>
+                        <li>Tap <strong>Add</strong>.</li>
+                    </ol>
+                </div>
+
+                <div class="glass-panel rounded-2xl p-6 space-y-4">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-brands fa-android text-2xl text-green-400"></i>
+                        <h3 class="font-bold">Android</h3>
+                    </div>
+                    <ol class="list-decimal list-inside text-sm text-white/70 space-y-2 ml-1">
+                        <li>Open this page in <strong>Chrome</strong>.</li>
+                        <li>Tap the <strong>Menu</strong> (three dots).</li>
+                        <li>Tap <strong>"Install App"</strong> or "Add to Home Screen".</li>
+                        <li>Follow the prompts to install.</li>
+                    </ol>
+                </div>
+
+                <div class="glass-panel rounded-2xl p-6 space-y-4">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-desktop text-2xl text-blue-300"></i>
+                        <h3 class="font-bold">PC / Mac</h3>
+                    </div>
+                    <ol class="list-decimal list-inside text-sm text-white/70 space-y-2 ml-1">
+                        <li>Open this page in <strong>Chrome</strong> or <strong>Edge</strong>.</li>
+                        <li>Look for the <i class="fa-regular fa-circle-down"></i> <strong>Install</strong> icon in the
+                            address bar.</li>
+                        <li>Click it and select <strong>Install</strong>.</li>
+                    </ol>
+                </div>
+            </div>
+        </section>
+
+        <!-- View: PROFILE (Existing, just ensuring it has a back button if accessed via menu) -->
         <section id="view-profile"
             class="absolute inset-0 p-4 pb-24 overflow-y-auto view-section translate-x-full transition-all duration-300 hidden">
             <div class="max-w-2xl mx-auto space-y-4">
-                <div>
-                    <h2 class="text-2xl font-bold">Teacher Profile</h2>
-                    <p class="text-white/60 text-sm">Manage your information</p>
+                <div class="flex items-center gap-3 mb-2">
+                    <button onclick="navSwitch('menu')"
+                        class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                    <div>
+                        <h2 class="text-2xl font-bold">Teacher Profile</h2>
+                        <p class="text-white/60 text-sm">Manage your information</p>
+                    </div>
                 </div>
 
                 <div class="glass-panel rounded-2xl p-6 space-y-6">
@@ -432,10 +623,10 @@
                 <i class="fa-solid fa-list-check text-xl mb-1"></i>
                 <span class="text-[10px] font-medium tracking-wide">LOGS</span>
             </button>
-            <button onclick="navSwitch('profile')" id="btn-profile"
+            <button onclick="navSwitch('menu')" id="btn-menu"
                 class="flex flex-col items-center justify-center w-full h-full text-white/60 hover:text-white transition-colors">
-                <i class="fa-solid fa-user-gear text-xl mb-1"></i>
-                <span class="text-[10px] font-medium tracking-wide">PROFILE</span>
+                <i class="fa-solid fa-bars text-xl mb-1"></i>
+                <span class="text-[10px] font-medium tracking-wide">MORE</span>
             </button>
         </div>
     </nav>
@@ -664,14 +855,20 @@
         };
 
         // --- NAVIGATION ---
+        // --- NAVIGATION ---
         function navSwitch(viewId) {
-            // Update Btns
-            ['scan', 'learners', 'logs', 'profile'].forEach(id => {
-                const btn = document.getElementById(`btn-${id}`);
-                const isActive = id === viewId;
-                btn.classList.toggle('nav-active', isActive);
-                btn.classList.toggle('text-white/60', !isActive);
-            });
+            // Update Btns (Only for bottom nav items)
+            const navItems = ['scan', 'learners', 'logs', 'menu'];
+            if (navItems.includes(viewId)) {
+                navItems.forEach(id => {
+                    const btn = document.getElementById(`btn-${id}`);
+                    if (btn) { // Check exists
+                        const isActive = id === viewId;
+                        btn.classList.toggle('nav-active', isActive);
+                        btn.classList.toggle('text-white/60', !isActive);
+                    }
+                });
+            }
 
             // Update Views
             document.querySelectorAll('.view-section').forEach(el => {
@@ -679,16 +876,28 @@
                 el.classList.remove('translate-x-0');
             });
             const target = document.getElementById(`view-${viewId}`);
-            target.classList.remove('hidden');
-            // Small timeout for transition
-            setTimeout(() => target.classList.add('translate-x-0'), 10);
+            if (target) {
+                target.classList.remove('hidden');
+                // Small timeout for transition
+                setTimeout(() => target.classList.add('translate-x-0'), 10);
+            }
 
+            // Render Callbacks
             if (viewId === 'learners') renderLearners();
             if (viewId === 'logs') {
                 populateSectionSelector();
                 renderLogs();
             }
             if (viewId === 'profile') renderProfile();
+
+            // Check auth status when opening menu
+            if (viewId === 'menu') {
+                const statusText = document.getElementById('account-status-text');
+                if (statusText) {
+                    statusText.innerText = store.auth.isLoggedIn ? `Signed in as ${store.auth.username}` : "Not Signed In";
+                    statusText.className = store.auth.isLoggedIn ? "text-xs text-cyan-300" : "text-xs text-white/50";
+                }
+            }
         }
 
         // --- MODE TOGGLE ---
@@ -1101,6 +1310,7 @@
             logFeedback(`Marked ${data.n} (${typeText})`, "success");
 
             // SMS Trigger
+            // SMS Trigger (Automatic)
             if (store.settings.sendSms && data.p) {
                 // Use appropriate template based on mode if SMS is enabled
                 const template = store.mode === 'in' ? store.settings.templateIn : store.settings.templateOut;
@@ -1110,12 +1320,16 @@
                     date: dateStr
                 });
 
-                // Log feedback with an action button to send the SMS
-                const smsAction = {
-                    label: 'Send SMS',
-                    link: `sms:${data.p}?body=${encodeURIComponent(msg)}`
-                };
-                logFeedback(`SMS ready for ${data.n}`, "info", smsAction);
+                const smsLink = `sms:${data.p}?body=${encodeURIComponent(msg)}`;
+
+                // Log feedback
+                logFeedback(`Opening SMS for ${data.n}...`, "info");
+
+                // Auto-open SMS (Small delay to allow feedback to render)
+                setTimeout(() => {
+                    window.location.href = smsLink;
+                }, 500);
+
             } else if (store.settings.sendSms && !data.p) {
                 logFeedback("No parent number linked", "warning");
             }
@@ -1167,6 +1381,74 @@
             c.prepend(div);
             // Limit history
             if (c.children.length > 5) c.lastElementChild.remove();
+        }
+
+        // --- BULK QR PRINT ---
+        function printAllQRs() {
+            if (store.learners.length === 0) {
+                alert("No learners to print.");
+                return;
+            }
+
+            const win = window.open('', '_blank');
+            win.document.write(`
+                <html>
+                <head>
+                    <title>Print All QR Codes</title>
+                    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>
+                    <style>
+                        body { font-family: sans-serif; padding: 20px; background: #f0f0f0; }
+                        .controls { text-align: center; margin-bottom: 20px; }
+                        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+                        .card { background: white; border: 1px solid #ccc; padding: 20px; text-align: center; border-radius: 10px; page-break-inside: avoid; }
+                        .qr-container { display: flex; justify-content: center; margin: 10px 0; }
+                        .name { font-weight: bold; font-size: 16px; margin-bottom: 5px; }
+                        .section { color: #666; font-size: 14px; }
+                        .btn { padding: 10px 20px; font-size: 16px; background: #0ea5e9; color: white; border: none; border-radius: 5px; cursor: pointer; }
+                        @media print {
+                            .controls { display: none; }
+                            body { background: white; padding: 0; }
+                            .grid { display: block; }
+                            .card { display: inline-block; width: 45%; margin: 1%; box-shadow: none; border: 1px solid #eee; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="controls">
+                        <button class="btn" onclick="window.print()">Print / Save as PDF</button>
+                    </div>
+                    <div class="grid" id="grid"></div>
+                    <script>
+                        const learners = ${JSON.stringify(store.learners)};
+                        const grid = document.getElementById('grid');
+                        
+                        // Wait for library to load
+                        setTimeout(() => {
+                            learners.forEach(l => {
+                                const card = document.createElement('div');
+                                card.className = 'card';
+                                
+                                const id = 'qr-' + Math.random().toString(36).substr(2, 9);
+                                
+                                card.innerHTML = \`
+                                    <div class="name">\${l.name}</div>
+                                    <div class="qr-container" id="\${id}"></div>
+                                    <div class="section">\${l.section}</div>
+                                \`;
+                                grid.appendChild(card);
+                                
+                                new QRCode(document.getElementById(id), {
+                                    text: l.id,
+                                    width: 128,
+                                    height: 128
+                                });
+                            });
+                        }, 500);
+                    <\/script>
+                </body>
+                </html>
+            `);
+            win.document.close();
         }
 
         // --- LOGS ---
