@@ -33,6 +33,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <!-- SheetJS (Excel Export) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- jsPDF (PDF Export) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <script>
         // Unregister Service Worker to resolve 404 errors and disable offline mode
         if ('serviceWorker' in navigator) {
@@ -111,6 +114,13 @@
             background: rgba(255, 255, 255, 0.3);
             border-radius: 10px;
         }
+
+        /* Active Quarter Button */
+        .active-quarter {
+            background: rgba(6, 182, 212, 0.3) !important;
+            color: #67e8f9 !important;
+            border: 1px solid rgba(6, 182, 212, 0.5);
+        }
     </style>
 </head>
 
@@ -123,8 +133,8 @@
                 <i class="fa-solid fa-shield-halved text-xl text-white"></i>
             </div>
             <div>
-                <h1 class="font-bold text-lg leading-tight">SJI<span class="text-cyan-300">Secure</span></h1>
-                <p class="text-xs text-blue-200">School Attendance Monitoring System</p>
+                <h1 class="font-bold text-lg leading-tight">SJIS<span class="text-cyan-300">Secure</span></h1>
+                <p class="text-xs text-blue-200">System Ready</p>
             </div>
         </div>
         <button onclick="toggleModal('modal-settings')"
@@ -242,6 +252,94 @@
 
                 <div id="learners-list" class="space-y-3">
                     <!-- Populated by JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- View: CLASS RECORDS -->
+        <section id="view-records"
+            class="absolute inset-0 p-4 pb-24 overflow-y-auto view-section translate-x-full transition-all duration-300 hidden">
+            <div class="max-w-6xl mx-auto space-y-4">
+                <div class="flex justify-between items-end mb-2">
+                    <div>
+                        <h2 class="text-2xl font-bold">Class Records</h2>
+                        <p class="text-white/60 text-sm">Manage student grades & assessments</p>
+                    </div>
+                </div>
+
+                <!-- Control Bar -->
+                <div class="glass-panel rounded-2xl p-4 space-y-4">
+                    <!-- Quarter Selector -->
+                    <div>
+                        <label
+                            class="block text-xs uppercase text-blue-200 font-bold tracking-wider mb-2">Quarter</label>
+                        <div class="flex gap-2">
+                            <button onclick="selectQuarter('q1')" id="quarter-q1"
+                                class="flex-1 glass-btn py-2 rounded-lg font-bold text-sm transition-colors quarter-btn active-quarter">
+                                Q1
+                            </button>
+                            <button onclick="selectQuarter('q2')" id="quarter-q2"
+                                class="flex-1 glass-btn py-2 rounded-lg font-bold text-sm transition-colors quarter-btn">
+                                Q2
+                            </button>
+                            <button onclick="selectQuarter('q3')" id="quarter-q3"
+                                class="flex-1 glass-btn py-2 rounded-lg font-bold text-sm transition-colors quarter-btn">
+                                Q3
+                            </button>
+                            <button onclick="selectQuarter('q4')" id="quarter-q4"
+                                class="flex-1 glass-btn py-2 rounded-lg font-bold text-sm transition-colors quarter-btn">
+                                Q4
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Section Selector -->
+                    <div>
+                        <label
+                            class="block text-xs uppercase text-blue-200 font-bold tracking-wider mb-2">Section</label>
+                        <select id="section-selector-records" onchange="selectSection(this.value)"
+                            class="glass-input w-full p-3 rounded-xl font-semibold">
+                            <option value="">-- All Sections --</option>
+                        </select>
+                    </div>
+
+                    <!-- Subject Selector & Management -->
+                    <div class="flex gap-2">
+                        <div class="flex-1">
+                            <label
+                                class="block text-xs uppercase text-blue-200 font-bold tracking-wider mb-2">Subject</label>
+                            <select id="subject-selector" onchange="renderClassRecords()"
+                                class="glass-input w-full p-3 rounded-xl font-semibold">
+                                <option value="">-- Select Subject --</option>
+                            </select>
+                        </div>
+                        <div class="flex items-end">
+                            <button onclick="toggleModal('modal-manage-subjects')"
+                                class="bg-cyan-500/20 text-cyan-300 px-4 py-3 rounded-lg font-bold text-sm border border-cyan-500/30 hover:bg-cyan-500/30 transition-colors">
+                                <i class="fa-solid fa-gear mr-1"></i> Manage
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gradebook Area -->
+                <div id="gradebook-container" class="glass-panel rounded-2xl p-4">
+                    <div class="text-center text-white/40 py-10">
+                        <i class="fa-solid fa-table text-4xl mb-3 opacity-50"></i>
+                        <p>Select a subject to view class records</p>
+                    </div>
+                </div>
+
+                <!-- Export Buttons (Hidden by default, shown when subject selected) -->
+                <div id="export-buttons" class="hidden flex gap-2 justify-end">
+                    <button onclick="exportClassRecordsPDF()"
+                        class="bg-red-500/20 text-red-300 px-4 py-2 rounded-lg font-bold text-sm border border-red-500/30 hover:bg-red-500/30 transition-colors">
+                        <i class="fa-solid fa-file-pdf mr-1"></i> Export PDF
+                    </button>
+                    <button onclick="exportClassRecordsExcel()"
+                        class="bg-green-500/20 text-green-300 px-4 py-2 rounded-lg font-bold text-sm border border-green-500/30 hover:bg-green-500/30 transition-colors">
+                        <i class="fa-solid fa-file-excel mr-1"></i> Export Excel
+                    </button>
                 </div>
             </div>
         </section>
@@ -428,6 +526,14 @@
                             <i class="fa-solid fa-user-gear text-xl"></i>
                         </div>
                         <span class="font-bold text-sm">My Profile</span>
+                    </button>
+                    <button onclick="openManageHolidays()"
+                        class="glass-panel p-6 rounded-2xl flex flex-col items-center gap-3 hover:bg-white/5 transition-colors">
+                        <div
+                            class="w-12 h-12 rounded-full bg-orange-500/20 flex items-center justify-center text-orange-300">
+                            <i class="fa-solid fa-calendar-day text-xl"></i>
+                        </div>
+                        <span class="font-bold text-sm">Holidays</span>
                     </button>
                 </div>
 
@@ -620,6 +726,11 @@
                 <i class="fa-solid fa-user-group text-xl mb-1"></i>
                 <span class="text-[10px] font-medium tracking-wide">LEARNERS</span>
             </button>
+            <button onclick="navSwitch('records')" id="btn-records"
+                class="flex flex-col items-center justify-center w-full h-full text-white/60 hover:text-white transition-colors">
+                <i class="fa-solid fa-table text-xl mb-1"></i>
+                <span class="text-[10px] font-medium tracking-wide">RECORDS</span>
+            </button>
             <button onclick="navSwitch('logs')" id="btn-logs"
                 class="flex flex-col items-center justify-center w-full h-full text-white/60 hover:text-white transition-colors">
                 <i class="fa-solid fa-list-check text-xl mb-1"></i>
@@ -698,7 +809,9 @@
             class="glass-panel bg-slate-900/90 rounded-2xl w-full max-w-sm p-6 transform transition-all shadow-2xl border-white/20">
             <h3 class="text-xl font-bold mb-4">New Learner</h3>
             <form onsubmit="addLearner(event)" class="space-y-4">
-                <input type="text" name="name" required placeholder="Full Name"
+                <input type="text" name="lastname" required placeholder="Last Name"
+                    class="glass-input w-full p-3 rounded-xl placeholder-white/30">
+                <input type="text" name="firstname" required placeholder="First Name"
                     class="glass-input w-full p-3 rounded-xl placeholder-white/30">
                 <input type="text" name="section" required placeholder="Section"
                     class="glass-input w-full p-3 rounded-xl placeholder-white/30">
@@ -711,8 +824,50 @@
                     <input type="tel" name="parent_no" required placeholder="Parent's No. (09...)"
                         class="glass-input w-full p-3 rounded-xl placeholder-white/30">
                 </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <select name="enrollmentStatus" class="glass-input w-full p-3 rounded-xl text-sm">
+                        <option value="regular" selected>Regular</option>
+                        <option value="late">Late (Beyond Cut-off)</option>
+                        <option value="transferred-in">Transferred In</option>
+                    </select>
+                    <input type="date" name="enrollmentDate"
+                        class="glass-input w-full p-3 rounded-xl text-white/70 text-sm">
+                </div>
                 <div class="flex gap-3 pt-2">
                     <button type="button" onclick="toggleModal('modal-add-learner')"
+                        class="flex-1 py-3 rounded-xl font-medium text-white/60 hover:bg-white/10 transition-colors">Cancel</button>
+                    <button type="submit"
+                        class="flex-1 bg-cyan-500 hover:bg-cyan-400 py-3 rounded-xl font-bold text-white shadow-lg transition-transform active:scale-95">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Update Status Modal -->
+    <div id="modal-learner-status"
+        class="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div
+            class="glass-panel bg-slate-900/90 rounded-2xl w-full max-w-sm p-6 transform transition-all shadow-2xl border-white/20">
+            <h3 class="text-xl font-bold mb-4">Update Status</h3>
+            <form onsubmit="updateLearnerStatus(event)" class="space-y-4">
+                <input type="hidden" name="id" id="status-learner-id">
+                <div class="text-white/70 mb-2 font-bold" id="status-learner-name">Student Name</div>
+
+                <select name="status" id="status-select" required class="glass-input w-full p-3 rounded-xl"
+                    onchange="toggleStatusDate(this.value)">
+                    <option value="active">Active</option>
+                    <option value="transferred-out">Transferred Out</option>
+                    <option value="nls">No Longer in School (NLS)</option>
+                </select>
+
+                <div id="status-date-container" class="hidden">
+                    <label class="text-xs text-white/50 ml-1 block mb-1">Date of Transfer/NLS</label>
+                    <input type="date" name="statusDate" id="status-date"
+                        class="glass-input w-full p-3 rounded-xl text-white">
+                </div>
+
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="toggleModal('modal-learner-status')"
                         class="flex-1 py-3 rounded-xl font-medium text-white/60 hover:bg-white/10 transition-colors">Cancel</button>
                     <button type="submit"
                         class="flex-1 bg-cyan-500 hover:bg-cyan-400 py-3 rounded-xl font-bold text-white shadow-lg transition-transform active:scale-95">Save</button>
@@ -813,6 +968,127 @@
         </div>
     </div>
 
+    <!-- Manage Subjects Modal -->
+    <div id="modal-manage-subjects"
+        class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div
+            class="glass-panel bg-slate-900/90 rounded-2xl w-full max-w-lg p-6 border-white/20 max-h-[90vh] overflow-y-auto">
+            <h3 class="text-xl font-bold mb-4">Manage Subjects</h3>
+
+            <!-- Add New Subject Form -->
+            <div class="glass-panel bg-white/5 rounded-xl p-4 mb-4">
+                <h4 class="text-sm font-bold text-blue-200 uppercase tracking-wider mb-3">Add New Subject</h4>
+                <form onsubmit="addSubject(event)" class="space-y-3">
+                    <input type="text" id="new-subject-name" required placeholder="Subject Name (e.g., Mathematics)"
+                        class="glass-input w-full p-3 rounded-xl placeholder-white/30 text-sm">
+
+                    <div class="grid grid-cols-3 gap-2">
+                        <div>
+                            <label class="block text-xs text-white/60 mb-1">WW %</label>
+                            <input type="number" id="new-subject-ww" required min="0" max="100" value="40"
+                                class="glass-input w-full p-2 rounded-lg text-sm text-center">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-white/60 mb-1">PT %</label>
+                            <input type="number" id="new-subject-pt" required min="0" max="100" value="40"
+                                class="glass-input w-full p-2 rounded-lg text-sm text-center">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-white/60 mb-1">QE %</label>
+                            <input type="number" id="new-subject-qe" required min="0" max="100" value="20"
+                                class="glass-input w-full p-2 rounded-lg text-sm text-center">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-white/60 mb-1">QE Max Score</label>
+                        <input type="number" id="new-subject-qe-max" required min="1" value="100"
+                            class="glass-input w-full p-2 rounded-lg text-sm text-center">
+                    </div>
+                    <p class="text-xs text-white/40">Total: <span id="weight-total">100</span>%</p>
+                    <button type="submit"
+                        class="w-full bg-cyan-500 hover:bg-cyan-400 py-2 rounded-lg font-bold text-sm text-white transition-colors">
+                        <i class="fa-solid fa-plus mr-1"></i> Add Subject
+                    </button>
+                </form>
+            </div>
+
+            <!-- Existing Subjects List -->
+            <div id="subjects-list" class="space-y-2 mb-4">
+                <!-- Populated by JS -->
+            </div>
+
+            <button onclick="toggleModal('modal-manage-subjects')"
+                class="w-full py-3 rounded-xl font-medium text-white/60 hover:bg-white/10 transition-colors">
+                Close
+            </button>
+        </div>
+    </div>
+
+    <!-- Add Activity Modal -->
+    <div id="modal-add-activity"
+        class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-panel bg-slate-900/90 rounded-2xl w-full max-w-sm p-6 border-white/20">
+            <h3 class="text-xl font-bold mb-4">Add Activity</h3>
+            <form onsubmit="addActivity(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs uppercase text-blue-200 font-bold tracking-wider mb-2">Type</label>
+                    <select id="activity-type" required class="glass-input w-full p-3 rounded-xl">
+                        <option value="ww">Written Work</option>
+                        <option value="pt">Performance Task</option>
+                    </select>
+                </div>
+                <input type="text" id="activity-name" required placeholder="Activity Name (e.g., Quiz 1)"
+                    class="glass-input w-full p-3 rounded-xl placeholder-white/30">
+                <input type="number" id="activity-max-score" required min="1" placeholder="Max Score"
+                    class="glass-input w-full p-3 rounded-xl placeholder-white/30">
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="toggleModal('modal-add-activity')"
+                        class="flex-1 py-3 rounded-xl font-medium text-white/60 hover:bg-white/10 transition-colors">Cancel</button>
+                    <button type="submit"
+                        class="flex-1 bg-cyan-500 hover:bg-cyan-400 py-3 rounded-xl font-bold text-white shadow-lg transition-transform active:scale-95">Add</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Manage Holidays Modal -->
+    <div id="modal-manage-holidays"
+        class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-panel bg-slate-900/90 rounded-2xl w-full max-w-sm p-6 border-white/20 relative">
+            <button onclick="toggleModal('modal-manage-holidays')"
+                class="absolute top-4 right-4 text-white/40 hover:text-white transition-colors">
+                <i class="fa-solid fa-times"></i>
+            </button>
+            <h3 class="text-xl font-bold mb-4">Manage Holidays</h3>
+
+            <form onsubmit="addHoliday(event)" class="space-y-4 mb-6">
+                <div>
+                    <label class="block text-xs uppercase text-blue-200 font-bold tracking-wider mb-2">Select
+                        Date</label>
+                    <input type="date" id="holiday-date" required class="glass-input w-full p-3 rounded-xl"
+                        style="color-scheme: dark;">
+                </div>
+                <div>
+                    <label
+                        class="block text-xs uppercase text-blue-200 font-bold tracking-wider mb-2">Description</label>
+                    <input type="text" id="holiday-desc" placeholder="e.g. National Holiday"
+                        class="glass-input w-full p-3 rounded-xl placeholder-white/30">
+                </div>
+                <button type="submit"
+                    class="w-full bg-cyan-500 hover:bg-cyan-400 py-3 rounded-xl font-bold text-white shadow-lg transition-transform active:scale-95">
+                    <i class="fa-solid fa-plus mr-2"></i>Add Holiday
+                </button>
+            </form>
+
+            <div class="border-t border-white/10 pt-4">
+                <h4 class="text-xs uppercase text-white/50 font-bold tracking-wider mb-3">Holiday List</h4>
+                <div id="holidays-list" class="max-h-48 overflow-y-auto space-y-2 pr-1">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // --- GLOBAL AUDIO CONTEXT ---
         let audioContext;
@@ -826,6 +1102,7 @@
         const store = {
             learners: JSON.parse(localStorage.getItem('learners')) || [],
             logs: JSON.parse(localStorage.getItem('logs')) || [],
+            holidays: JSON.parse(localStorage.getItem('holidays')) || [], // Array of "YYYY-MM-DD" strings
             settings: JSON.parse(localStorage.getItem('settings')) || {
                 sendSms: true,
                 templateIn: "Good day! Your child {name} has arrived at school at {time}.",
@@ -844,23 +1121,41 @@
             },
             scanning: false,
             currentCamera: 'environment', // 'user' or 'environment' or ID
-            mode: 'in' // 'in' or 'out'
+            mode: 'in', // 'in' or 'out'
+            classRecords: JSON.parse(localStorage.getItem('classRecords')) || {
+                subjects: [], // { id, name, weights: { ww: 40, pt: 40, qe: 20 }, quarters: { q1: { activities: [] }, q2... } }
+                grades: {} // { [studentId]: { [subjectId]: { [quarter]: { [actId]: score, qe: score } } } }
+            },
+            currentQuarter: 'q1', // Current selected quarter for class records
+            currentSection: '' // Current selected section for class records
         };
 
         // --- PERSISTENCE ---
         const save = () => {
             localStorage.setItem('learners', JSON.stringify(store.learners));
             localStorage.setItem('logs', JSON.stringify(store.logs));
+            localStorage.setItem('holidays', JSON.stringify(store.holidays));
             localStorage.setItem('settings', JSON.stringify(store.settings));
             localStorage.setItem('auth', JSON.stringify(store.auth));
             localStorage.setItem('profile', JSON.stringify(store.profile));
+            localStorage.setItem('classRecords', JSON.stringify(store.classRecords));
         };
 
         // --- NAVIGATION ---
+        function isHoliday(dateObj) {
+            if (!store.holidays) return false;
+            // Pad month/day with 0 if needed for comparison to YYYY-MM-DD
+            const y = dateObj.getFullYear();
+            const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const d = String(dateObj.getDate()).padStart(2, '0');
+            const dateStr = `${y}-${m}-${d}`;
+            return store.holidays.some(h => h.date === dateStr);
+        }
+
         // --- NAVIGATION ---
         function navSwitch(viewId) {
             // Update Btns (Only for bottom nav items)
-            const navItems = ['scan', 'learners', 'logs', 'menu'];
+            const navItems = ['scan', 'learners', 'records', 'logs', 'menu'];
             if (navItems.includes(viewId)) {
                 navItems.forEach(id => {
                     const btn = document.getElementById(`btn-${id}`);
@@ -886,6 +1181,11 @@
 
             // Render Callbacks
             if (viewId === 'learners') renderLearners();
+            if (viewId === 'records') {
+                populateSectionSelectorRecords();
+                populateSubjectSelector();
+                renderClassRecords();
+            }
             if (viewId === 'logs') {
                 populateSectionSelector();
                 renderLogs();
@@ -928,6 +1228,578 @@
             }
         }
 
+        // --- CLASS RECORDS FUNCTIONS ---
+        let currentSubjectId = null;
+
+        function populateSectionSelectorRecords() {
+            const selector = document.getElementById('section-selector-records');
+            selector.innerHTML = '<option value="">-- All Sections --</option>';
+            const sections = [...new Set(store.learners.map(l => l.section))].sort();
+            sections.forEach(s => {
+                const option = document.createElement('option');
+                option.value = s;
+                option.textContent = s;
+                selector.appendChild(option);
+            });
+            // Restore selection if exists
+            if (store.currentSection) {
+                selector.value = store.currentSection;
+            }
+        }
+
+        function selectSection(section) {
+            store.currentSection = section;
+            renderClassRecords();
+        }
+
+        function selectQuarter(quarter) {
+            store.currentQuarter = quarter;
+            // Update UI
+            document.querySelectorAll('.quarter-btn').forEach(btn => {
+                btn.classList.remove('active-quarter');
+            });
+            document.getElementById(`quarter-${quarter}`).classList.add('active-quarter');
+            renderClassRecords();
+        }
+
+        function populateSubjectSelector() {
+            const selector = document.getElementById('subject-selector');
+            selector.innerHTML = '<option value="">-- Select Subject --</option>';
+            store.classRecords.subjects.forEach(subj => {
+                const option = document.createElement('option');
+                option.value = subj.id;
+                option.textContent = subj.name;
+                selector.appendChild(option);
+            });
+            // Restore selection if exists
+            if (currentSubjectId) {
+                selector.value = currentSubjectId;
+            }
+        }
+
+        function addSubject(e) {
+            e.preventDefault();
+            const name = document.getElementById('new-subject-name').value.trim();
+            const ww = parseInt(document.getElementById('new-subject-ww').value);
+            const pt = parseInt(document.getElementById('new-subject-pt').value);
+            const qe = parseInt(document.getElementById('new-subject-qe').value);
+            const qeMaxScore = parseInt(document.getElementById('new-subject-qe-max').value) || 100;
+
+            // Validate total = 100
+            if (ww + pt + qe !== 100) {
+                alert('Weights must total 100%');
+                return;
+            }
+
+            const subject = {
+                id: Date.now().toString(36),
+                name: name,
+                weights: { ww, pt, qe },
+                qeMaxScore: qeMaxScore, // Store QE max score
+                quarters: {
+                    q1: { activities: [] },
+                    q2: { activities: [] },
+                    q3: { activities: [] },
+                    q4: { activities: [] }
+                }
+            };
+
+            store.classRecords.subjects.push(subject);
+            save();
+            e.target.reset();
+            renderSubjectsList();
+            populateSubjectSelector();
+        }
+
+        function renderSubjectsList() {
+            const container = document.getElementById('subjects-list');
+            container.innerHTML = '';
+
+            if (store.classRecords.subjects.length === 0) {
+                container.innerHTML = '<p class="text-sm text-white/40 text-center py-4">No subjects added yet</p>';
+                return;
+            }
+
+            store.classRecords.subjects.forEach(subj => {
+                const div = document.createElement('div');
+                div.className = 'glass-panel rounded-lg p-3 flex justify-between items-center';
+                div.innerHTML = `
+                    <div>
+                        <div class="font-bold text-sm">${subj.name}</div>
+                        <div class="text-xs text-white/60">WW: ${subj.weights.ww}% | PT: ${subj.weights.pt}% | QE: ${subj.weights.qe}%</div>
+                    </div>
+                    <button onclick="deleteSubject('${subj.id}')" 
+                        class="w-8 h-8 rounded-full bg-red-500/20 text-red-300 hover:bg-red-500/40 flex items-center justify-center transition-colors">
+                        <i class="fa-solid fa-trash text-sm"></i>
+                    </button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function deleteSubject(id) {
+            if (!confirm('Delete this subject and all associated grades?')) return;
+            store.classRecords.subjects = store.classRecords.subjects.filter(s => s.id !== id);
+            // Delete all grades for this subject
+            Object.keys(store.classRecords.grades).forEach(studentId => {
+                if (store.classRecords.grades[studentId][id]) {
+                    delete store.classRecords.grades[studentId][id];
+                }
+            });
+            save();
+            renderSubjectsList();
+            populateSubjectSelector();
+            if (currentSubjectId === id) {
+                currentSubjectId = null;
+                document.getElementById('subject-selector').value = '';
+                renderClassRecords();
+            }
+        }
+
+        function renderClassRecords() {
+            const subjectId = document.getElementById('subject-selector').value;
+            currentSubjectId = subjectId;
+            const container = document.getElementById('gradebook-container');
+            const exportButtons = document.getElementById('export-buttons');
+
+            if (!subjectId) {
+                container.innerHTML = `
+                    <div class="text-center text-white/40 py-10">
+                        <i class="fa-solid fa-table text-4xl mb-3 opacity-50"></i>
+                        <p>Select a subject to view class records</p>
+                    </div>
+                `;
+                exportButtons.classList.add('hidden');
+                return;
+            }
+
+            // Show export buttons
+            exportButtons.classList.remove('hidden');
+
+            const subject = store.classRecords.subjects.find(s => s.id === subjectId);
+            const quarter = store.currentQuarter;
+            const activities = subject.quarters[quarter].activities;
+
+            // Build gradebook table
+            let html = `
+                <div class="mb-3 flex justify-between items-center">
+                    <h3 class="font-bold text-lg">${subject.name} - ${quarter.toUpperCase()}</h3>
+                    <button onclick="toggleModal('modal-add-activity')" 
+                        class="bg-white/10 hover:bg-white/20 px-3 py-2 rounded-lg font-bold text-sm transition-colors">
+                        <i class="fa-solid fa-plus mr-1"></i> Add Activity
+                    </button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm border-collapse">
+                        <thead>
+                            <tr class="bg-white/10">
+                                <th class="p-2 text-left sticky left-0 bg-slate-800 z-10 border-r border-white/10">Student</th>
+            `;
+
+            // WW columns
+            const wwActivities = activities.filter(a => a.type === 'ww');
+            if (wwActivities.length > 0) {
+                html += `<th colspan="${wwActivities.length}" class="p-2 text-center border-r border-white/10 bg-blue-500/10">Written Works</th>`;
+            }
+
+            // PT columns
+            const ptActivities = activities.filter(a => a.type === 'pt');
+            if (ptActivities.length > 0) {
+                html += `<th colspan="${ptActivities.length}" class="p-2 text-center border-r border-white/10 bg-purple-500/10">Performance Tasks</th>`;
+            }
+
+            // QE + Summary
+            html += `
+                <th class="p-2 text-center border-r border-white/10 bg-orange-500/10">QE</th>
+                <th class="p-2 text-center bg-cyan-500/10">Final Grade</th>
+            </tr>
+            <tr class="bg-white/5 text-xs">
+                <th class="p-2 sticky left-0 bg-slate-800 z-10 border-r border-white/10"></th>
+            `;
+
+            // Activity names row
+            wwActivities.forEach(act => {
+                html += `<th class="p-2 text-center border-r border-white/10" title="${act.name}">${act.name}<br/>(${act.maxScore})</th>`;
+            });
+            ptActivities.forEach(act => {
+                html += `<th class="p-2 text-center border-r border-white/10" title="${act.name}">${act.name}<br/>(${act.maxScore})</th>`;
+            });
+            html += `
+                <th class="p-2 text-center border-r border-white/10">Score</th>
+                <th class="p-2 text-center"></th>
+            </tr>
+            </thead>
+            <tbody>
+            `;
+
+            // Student rows - filter by section
+            const filteredLearners = store.currentSection
+                ? store.learners.filter(l => l.section === store.currentSection)
+                : store.learners;
+
+            filteredLearners.forEach(learner => {
+                html += `<tr class="border-t border-white/10 hover:bg-white/5">`;
+                html += `<td class="p-2 font-medium sticky left-0 bg-slate-800/95 z-10 border-r border-white/10">${learner.name}</td>`;
+
+                // WW scores
+                wwActivities.forEach(act => {
+                    const score = getScore(learner.id, subjectId, quarter, act.id);
+                    html += `<td class="p-1 text-center border-r border-white/10">
+                        <input type="number" min="0" max="${act.maxScore}" value="${score || ''}" 
+                            onchange="updateScore('${learner.id}', '${subjectId}', '${quarter}', '${act.id}', this.value, ${act.maxScore})"
+                            class="w-16 bg-white/5 border border-white/10 rounded px-2 py-1 text-center text-xs focus:bg-white/10 focus:outline-none focus:border-cyan-500">
+                    </td>`;
+                });
+
+                // PT scores
+                ptActivities.forEach(act => {
+                    const score = getScore(learner.id, subjectId, quarter, act.id);
+                    html += `<td class="p-1 text-center border-r border-white/10">
+                        <input type="number" min="0" max="${act.maxScore}" value="${score || ''}" 
+                            onchange="updateScore('${learner.id}', '${subjectId}', '${quarter}', '${act.id}', this.value, ${act.maxScore})"
+                            class="w-16 bg-white/5 border border-white/10 rounded px-2 py-1 text-center text-xs focus:bg-white/10 focus:outline-none focus:border-purple-500">
+                    </td>`;
+                });
+
+                // QE score
+                const qeScore = getScore(learner.id, subjectId, quarter, 'qe');
+                const qeMax = subject.qeMaxScore || 100; // Use subject's QE max score
+                html += `<td class="p-1 text-center border-r border-white/10">
+                    <input type="number" min="0" max="${qeMax}" value="${qeScore || ''}" 
+                        onchange="updateScore('${learner.id}', '${subjectId}', '${quarter}', 'qe', this.value, ${qeMax})"
+                        class="w-16 bg-white/5 border border-white/10 rounded px-2 py-1 text-center text-xs focus:bg-white/10 focus:outline-none focus:border-orange-500">
+                </td>`;
+
+                // Final Grade
+                const finalGrade = calculateFinalGrade(learner.id, subjectId, quarter, subject, activities);
+                html += `<td class="p-2 text-center font-bold text-cyan-300">${finalGrade !== null ? finalGrade.toFixed(2) : '-'}</td>`;
+
+                html += `</tr>`;
+            });
+
+            html += `</tbody></table></div>`;
+            container.innerHTML = html;
+        }
+
+        function getScore(studentId, subjectId, quarter, activityId) {
+            if (!store.classRecords.grades[studentId]) return null;
+            if (!store.classRecords.grades[studentId][subjectId]) return null;
+            if (!store.classRecords.grades[studentId][subjectId][quarter]) return null;
+            return store.classRecords.grades[studentId][subjectId][quarter][activityId] || null;
+        }
+
+        function updateScore(studentId, subjectId, quarter, activityId, value, maxScore) {
+            // Allow empty string to clear score
+            if (value === '' || value === null) {
+                // Initialize nested structure
+                if (!store.classRecords.grades[studentId]) {
+                    store.classRecords.grades[studentId] = {};
+                }
+                if (!store.classRecords.grades[studentId][subjectId]) {
+                    store.classRecords.grades[studentId][subjectId] = {};
+                }
+                if (!store.classRecords.grades[studentId][subjectId][quarter]) {
+                    store.classRecords.grades[studentId][subjectId][quarter] = {};
+                }
+                delete store.classRecords.grades[studentId][subjectId][quarter][activityId];
+                save();
+                renderClassRecords();
+                return;
+            }
+
+            const numValue = parseFloat(value);
+            if (isNaN(numValue) || numValue < 0 || numValue > maxScore) {
+                alert(`Score must be between 0 and ${maxScore}`);
+                renderClassRecords();
+                return;
+            }
+
+            // Initialize nested structure
+            if (!store.classRecords.grades[studentId]) {
+                store.classRecords.grades[studentId] = {};
+            }
+            if (!store.classRecords.grades[studentId][subjectId]) {
+                store.classRecords.grades[studentId][subjectId] = {};
+            }
+            if (!store.classRecords.grades[studentId][subjectId][quarter]) {
+                store.classRecords.grades[studentId][subjectId][quarter] = {};
+            }
+
+            store.classRecords.grades[studentId][subjectId][quarter][activityId] = numValue;
+            save();
+            renderClassRecords(); // Re-render to update final grade
+        }
+
+        function calculateFinalGrade(studentId, subjectId, quarter, subject, activities) {
+            const wwActivities = activities.filter(a => a.type === 'ww');
+            const ptActivities = activities.filter(a => a.type === 'pt');
+
+            // Calculate WW average
+            let wwTotal = 0;
+            let wwMax = 0;
+            wwActivities.forEach(act => {
+                const score = getScore(studentId, subjectId, quarter, act.id);
+                if (score !== null && score !== undefined) { // Include zero scores
+                    wwTotal += score;
+                    wwMax += act.maxScore;
+                }
+            });
+            const wwPercent = wwMax > 0 ? (wwTotal / wwMax) * 100 : 0;
+
+            // Calculate PT average
+            let ptTotal = 0;
+            let ptMax = 0;
+            ptActivities.forEach(act => {
+                const score = getScore(studentId, subjectId, quarter, act.id);
+                if (score !== null && score !== undefined) { // Include zero scores
+                    ptTotal += score;
+                    ptMax += act.maxScore;
+                }
+            });
+            const ptPercent = ptMax > 0 ? (ptTotal / ptMax) * 100 : 0;
+
+            // QE - convert to percentage based on qeMaxScore
+            const qeScore = getScore(studentId, subjectId, quarter, 'qe');
+            const qeMax = subject.qeMaxScore || 100;
+            const qePercent = (qeScore !== null && qeScore !== undefined) ? (qeScore / qeMax) * 100 : 0;
+
+            // Weighted final grade
+            const finalGrade = (wwPercent * subject.weights.ww / 100) +
+                (ptPercent * subject.weights.pt / 100) +
+                (qePercent * subject.weights.qe / 100);
+
+            // Return null if no data at all
+            if (wwMax === 0 && ptMax === 0 && qeScore === null && qeScore === undefined) {
+                return null;
+            }
+
+            return finalGrade;
+        }
+
+        function addActivity(e) {
+            e.preventDefault();
+            const subjectId = currentSubjectId;
+            if (!subjectId) {
+                alert('Please select a subject first');
+                return;
+            }
+
+            const type = document.getElementById('activity-type').value;
+            const name = document.getElementById('activity-name').value.trim();
+            const maxScore = parseInt(document.getElementById('activity-max-score').value);
+
+            const activity = {
+                id: Date.now().toString(36),
+                type: type,
+                name: name,
+                maxScore: maxScore
+            };
+
+            const subject = store.classRecords.subjects.find(s => s.id === subjectId);
+            subject.quarters[store.currentQuarter].activities.push(activity);
+            save();
+            e.target.reset();
+            toggleModal('modal-add-activity');
+            renderClassRecords();
+        }
+
+        // --- EXPORT FUNCTIONS ---
+        function exportClassRecordsPDF() {
+            const subjectId = currentSubjectId;
+            if (!subjectId) {
+                alert('Please select a subject first');
+                return;
+            }
+
+            const subject = store.classRecords.subjects.find(s => s.id === subjectId);
+            const quarter = store.currentQuarter;
+            const activities = subject.quarters[quarter].activities;
+            const wwActivities = activities.filter(a => a.type === 'ww');
+            const ptActivities = activities.filter(a => a.type === 'pt');
+
+            // Initialize jsPDF
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('landscape');
+
+            // Title
+            doc.setFontSize(16);
+            doc.text(`Class Records - ${subject.name} (${quarter.toUpperCase()})`, 14, 15);
+            doc.setFontSize(10);
+            doc.text(`School: ${store.profile.school || 'N/A'}`, 14, 22);
+            doc.text(`Teacher: ${store.profile.name || 'N/A'}`, 14, 27);
+            if (store.currentSection) {
+                doc.text(`Section: ${store.currentSection}`, 14, 32);
+            }
+
+            // Prepare table data
+            const headers = [['Student']];
+            const headerRow = ['Student'];
+
+            // Add WW columns
+            wwActivities.forEach(act => {
+                headerRow.push(`${act.name}\n(${act.maxScore})`);
+            });
+            // Add PT columns
+            ptActivities.forEach(act => {
+                headerRow.push(`${act.name}\n(${act.maxScore})`);
+            });
+            // Add QE and Final
+            const qeMax = subject.qeMaxScore || 100;
+            headerRow.push(`QE\n(${qeMax})`);
+            headerRow.push('Final Grade');
+
+            const tableData = [];
+            // Filter learners by section
+            const filteredLearners = store.currentSection
+                ? store.learners.filter(l => l.section === store.currentSection)
+                : store.learners;
+
+            filteredLearners.forEach(learner => {
+                const row = [learner.name];
+
+                // WW scores
+                wwActivities.forEach(act => {
+                    const score = getScore(learner.id, subjectId, quarter, act.id);
+                    row.push(score !== null ? score : '-');
+                });
+
+                // PT scores
+                ptActivities.forEach(act => {
+                    const score = getScore(learner.id, subjectId, quarter, act.id);
+                    row.push(score !== null ? score : '-');
+                });
+
+                // QE
+                const qeScore = getScore(learner.id, subjectId, quarter, 'qe');
+                row.push(qeScore !== null ? qeScore : '-');
+
+                // Final Grade
+                const finalGrade = calculateFinalGrade(learner.id, subjectId, quarter, subject, activities);
+                row.push(finalGrade !== null ? finalGrade.toFixed(2) : '-');
+
+                tableData.push(row);
+            });
+
+            // Generate table
+            doc.autoTable({
+                head: [headerRow],
+                body: tableData,
+                startY: store.currentSection ? 37 : 32,
+                theme: 'grid',
+                styles: { fontSize: 8, cellPadding: 2 },
+                headStyles: { fillColor: [15, 23, 42], textColor: 255 },
+                columnStyles: {
+                    0: { cellWidth: 40 } // Student name column
+                }
+            });
+
+            // Save
+            const sectionPart = store.currentSection ? `_${store.currentSection}` : '';
+            doc.save(`ClassRecords_${subject.name}_${quarter.toUpperCase()}${sectionPart}.pdf`);
+        }
+
+        function exportClassRecordsExcel() {
+            const subjectId = currentSubjectId;
+            if (!subjectId) {
+                alert('Please select a subject first');
+                return;
+            }
+
+            const subject = store.classRecords.subjects.find(s => s.id === subjectId);
+            const quarter = store.currentQuarter;
+            const activities = subject.quarters[quarter].activities;
+            const wwActivities = activities.filter(a => a.type === 'ww');
+            const ptActivities = activities.filter(a => a.type === 'pt');
+
+            // Prepare data
+            const wsData = [];
+
+            // Header
+            wsData.push([`Class Records - ${subject.name} (${quarter.toUpperCase()})`]);
+            wsData.push([`School: ${store.profile.school || 'N/A'}`]);
+            wsData.push([`Teacher: ${store.profile.name || 'N/A'}`]);
+            if (store.currentSection) {
+                wsData.push([`Section: ${store.currentSection}`]);
+            }
+            wsData.push([`Grading Weights: WW ${subject.weights.ww}% | PT ${subject.weights.pt}% | QE ${subject.weights.qe}%`]);
+            wsData.push([]);
+
+            // Column headers
+            const headerRow = ['Student'];
+            wwActivities.forEach(act => {
+                headerRow.push(`${act.name} (${act.maxScore})`);
+            });
+            ptActivities.forEach(act => {
+                headerRow.push(`${act.name} (${act.maxScore})`);
+            });
+            const qeMax = subject.qeMaxScore || 100;
+            headerRow.push(`QE (${qeMax})`);
+            headerRow.push('Final Grade');
+            wsData.push(headerRow);
+
+            // Student rows - filter by section
+            const filteredLearners = store.currentSection
+                ? store.learners.filter(l => l.section === store.currentSection)
+                : store.learners;
+
+            filteredLearners.forEach(learner => {
+                const row = [learner.name];
+
+                // WW scores
+                wwActivities.forEach(act => {
+                    const score = getScore(learner.id, subjectId, quarter, act.id);
+                    row.push(score !== null ? score : '');
+                });
+
+                // PT scores
+                ptActivities.forEach(act => {
+                    const score = getScore(learner.id, subjectId, quarter, act.id);
+                    row.push(score !== null ? score : '');
+                });
+
+                // QE
+                const qeScore = getScore(learner.id, subjectId, quarter, 'qe');
+                row.push(qeScore !== null ? qeScore : '');
+
+                // Final Grade
+                const finalGrade = calculateFinalGrade(learner.id, subjectId, quarter, subject, activities);
+                row.push(finalGrade !== null ? finalGrade.toFixed(2) : '');
+
+                wsData.push(row);
+            });
+
+            // Create workbook
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+            // Set column widths
+            ws['!cols'] = [{ wch: 30 }]; // Student name column
+
+            XLSX.utils.book_append_sheet(wb, ws, `${quarter.toUpperCase()}`);
+            const sectionPart = store.currentSection ? `_${store.currentSection}` : '';
+            XLSX.writeFile(wb, `ClassRecords_${subject.name}_${quarter.toUpperCase()}${sectionPart}.xlsx`);
+        }
+
+        // Update weight total display
+        document.addEventListener('DOMContentLoaded', () => {
+            const wwInput = document.getElementById('new-subject-ww');
+            const ptInput = document.getElementById('new-subject-pt');
+            const qeInput = document.getElementById('new-subject-qe');
+            const totalSpan = document.getElementById('weight-total');
+
+            function updateTotal() {
+                const total = (parseInt(wwInput.value) || 0) + (parseInt(ptInput.value) || 0) + (parseInt(qeInput.value) || 0);
+                totalSpan.textContent = total;
+                totalSpan.style.color = total === 100 ? '#67e8f9' : '#f87171';
+            }
+
+            if (wwInput && ptInput && qeInput) {
+                wwInput.addEventListener('input', updateTotal);
+                ptInput.addEventListener('input', updateTotal);
+                qeInput.addEventListener('input', updateTotal);
+            }
+        });
+
         // --- MODALS ---
         function toggleModal(id) {
             const el = document.getElementById(id);
@@ -949,6 +1821,9 @@
                         document.getElementById('sms-templates-container').style.display = e.target.checked ? 'block' : 'none';
                     };
                 }
+                if (id === 'modal-manage-subjects') {
+                    renderSubjectsList();
+                }
                 el.classList.remove('hidden');
             }
         }
@@ -963,6 +1838,70 @@
             save();
             toggleModal('modal-settings');
             alert("Settings saved!");
+        }
+
+        // --- HOLIDAYS ---
+        function openManageHolidays() {
+            toggleModal('modal-manage-holidays');
+            renderHolidaysList();
+        }
+
+        function addHoliday(e) {
+            e.preventDefault();
+            const dateInput = document.getElementById('holiday-date');
+            const descInput = document.getElementById('holiday-desc');
+            const dateVal = dateInput.value;
+            const descVal = descInput.value.trim();
+
+            if (!dateVal) return;
+
+            // Check duplicate
+            if (store.holidays.some(h => h.date === dateVal)) {
+                alert("This date is already marked as a holiday.");
+                return;
+            }
+
+            store.holidays.push({ date: dateVal, desc: descVal });
+            // Sort holidays
+            store.holidays.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            save();
+            dateInput.value = '';
+            descInput.value = '';
+            renderHolidaysList();
+        }
+
+        function deleteHoliday(index) {
+            if (confirm("Remove this holiday?")) {
+                store.holidays.splice(index, 1);
+                save();
+                renderHolidaysList();
+            }
+        }
+
+        function renderHolidaysList() {
+            const list = document.getElementById('holidays-list');
+            list.innerHTML = '';
+
+            if (!store.holidays || store.holidays.length === 0) {
+                list.innerHTML = '<p class="text-xs text-center text-white/40 py-2">No holidays added.</p>';
+                return;
+            }
+
+            store.holidays.forEach((h, index) => {
+                const el = document.createElement('div');
+                el.className = "flex justify-between items-center glass-panel p-2 rounded-lg text-sm";
+                el.innerHTML = `
+                    <div>
+                        <div class="font-bold text-cyan-300">${h.date}</div>
+                        <div class="text-xs text-white/60">${h.desc || 'No description'}</div>
+                    </div>
+                    <button onclick="deleteHoliday(${index})" class="text-red-400 hover:text-red-300">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                `;
+                list.appendChild(el);
+            });
         }
 
         // --- LOGIN / AUTH ---
@@ -1144,16 +2083,25 @@
         function addLearner(e) {
             e.preventDefault();
             const f = e.target;
+            const lastname = f.lastname.value.trim();
+            const firstname = f.firstname.value.trim();
+            const fullname = `${lastname}, ${firstname}`; // Format: "Last Name, First Name"
+
             const l = {
                 id: Date.now().toString(36),
-                name: f.name.value.trim(),
+                name: fullname,
                 section: f.section.value.trim(),
                 gender: f.gender.value,
-                parent_no: f.parent_no.value.trim()
+                parent_no: f.parent_no.value.trim(),
+                enrollmentStatus: f.enrollmentStatus.value,
+                enrollmentDate: f.enrollmentDate.value || new Date().toISOString().split('T')[0], // Default to today
+                status: 'active', // Default status
+                statusDate: null
             };
             store.learners.push(l);
             save();
             f.reset();
+            // Reset default date to today for next entry (if needed, or leave blank)
             toggleModal('modal-add-learner');
             renderLearners();
         }
@@ -1170,15 +2118,25 @@
             const c = document.getElementById('learners-list');
             c.innerHTML = store.learners.length ? '' : '<div class="text-white/40 text-center py-10">No learners yet.</div>';
 
-            store.learners.forEach(l => {
+            store.learners.sort((a, b) => a.name.localeCompare(b.name)).forEach(l => {
                 const el = document.createElement('div');
-                el.className = "glass-panel rounded-xl p-4 flex justify-between items-center";
+                el.className = "glass-panel rounded-xl p-4 flex justify-between items-center mb-3";
+
+                let statusBadge = '';
+                if (l.enrollmentStatus === 'late') statusBadge += '<span class="text-[10px] bg-orange-500/20 text-orange-300 px-1.5 py-0.5 rounded ml-2">LATE</span>';
+                if (l.enrollmentStatus === 'transferred-in') statusBadge += '<span class="text-[10px] bg-blue-500/20 text-blue-300 px-1.5 py-0.5 rounded ml-2">T-IN</span>';
+                if (l.status === 'transferred-out') statusBadge += '<span class="text-[10px] bg-red-500/20 text-red-300 px-1.5 py-0.5 rounded ml-2">T-OUT</span>';
+                if (l.status === 'nls') statusBadge += '<span class="text-[10px] bg-gray-500/20 text-gray-300 px-1.5 py-0.5 rounded ml-2">NLS</span>';
+
                 el.innerHTML = `
                     <div>
-                        <div class="font-bold text-lg">${l.name}</div>
+                        <div class="font-bold text-lg leading-tight">${l.name} ${statusBadge}</div>
                         <div class="text-sm text-white/60">${l.section}</div>
                     </div>
                     <div class="flex gap-2">
+                        <button onclick="openStatusModal('${l.id}')" class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors text-cyan-300" title="Update Status">
+                            <i class="fa-solid fa-user-pen"></i>
+                        </button>
                         <button onclick="showQR('${l.id}')" class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors">
                             <i class="fa-solid fa-qrcode"></i>
                         </button>
@@ -1189,6 +2147,51 @@
                 `;
                 c.appendChild(el);
             });
+        }
+
+        function openStatusModal(id) {
+            const l = store.learners.find(x => x.id === id);
+            if (!l) return;
+            document.getElementById('status-learner-id').value = l.id;
+            document.getElementById('status-learner-name').innerText = l.name;
+
+            // Set current values
+            const statusSelect = document.getElementById('status-select');
+            statusSelect.value = l.status || 'active';
+
+            const dateInput = document.getElementById('status-date');
+            dateInput.value = l.statusDate || new Date().toISOString().split('T')[0];
+
+            toggleStatusDate(statusSelect.value);
+            toggleModal('modal-learner-status');
+        }
+
+        function toggleStatusDate(val) {
+            const container = document.getElementById('status-date-container');
+            if (val === 'transferred-out' || val === 'nls') {
+                container.classList.remove('hidden');
+                document.getElementById('status-date').required = true;
+            } else {
+                container.classList.add('hidden');
+                document.getElementById('status-date').required = false;
+            }
+        }
+
+        function updateLearnerStatus(e) {
+            e.preventDefault();
+            const id = document.getElementById('status-learner-id').value;
+            const l = store.learners.find(x => x.id === id);
+            if (!l) return;
+
+            const newStatus = document.getElementById('status-select').value;
+            const newDate = document.getElementById('status-date').value;
+
+            l.status = newStatus;
+            l.statusDate = (newStatus === 'transferred-out' || newStatus === 'nls') ? newDate : null;
+
+            save();
+            toggleModal('modal-learner-status');
+            renderLearners();
         }
 
         function showQR(id) {
@@ -1681,22 +2684,36 @@
             males.sort(sortFn);
             females.sort(sortFn);
 
-            // --- HELPER ---
+            // --- METRICS CALCULATION VARS ---
+            let maleTotalPresent = 0;
+            let femaleTotalPresent = 0;
+            let maleTotalAbsent = 0;
+            let femaleTotalAbsent = 0;
+            let maleConseAbsences = 0;
+            let femaleConseAbsences = 0;
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            // --- GENERATE ROWS & ACCUMULATE METRICS ---
+            // Helper to process attendance and return metrics for a single learner
             const processLearner = (l, index) => {
                 let displayName = (l && l.name) ? String(l.name) : "Unknown Student";
-                // Optionally mark unregistered/genderless in the name for user awareness
-                // if ((l.gender || '') === 'Check Gender') displayName += " (?)"; 
-
                 const row = [index, displayName];
                 let presentCount = 0;
-
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
+                let currentStreak = 0;
+                let maxStreak = 0;
 
                 for (let d = 1; d <= daysInMonth; d++) {
                     const currentDay = new Date(year, month, d);
                     const dayOfWeek = currentDay.getDay();
                     const dateStr = currentDay.toLocaleDateString();
+
+                    // Check holiday
+                    if (isHoliday(currentDay)) {
+                        row.push(""); // Holiday treated as blank
+                        continue;
+                    }
 
                     if (dayOfWeek === 0 || dayOfWeek === 6) { // Weekend
                         row.push("");
@@ -1713,52 +2730,199 @@
                     if (isPresent) {
                         row.push("/");
                         presentCount++;
+                        currentStreak = 0; // Reset streak
                     } else if (currentDay < today) {
                         row.push("x");
+                        currentStreak++; // Increment streak
                     } else {
                         row.push("");
+                        // Future days don't break streak but don't count towards it either
+                    }
+                    maxStreak = Math.max(maxStreak, currentStreak);
+                }
+
+                // Calculate Business Days excluding weekends and holidays
+                let businessDaysInPast = 0;
+                for (let d = 1; d <= daysInMonth; d++) {
+                    const dObj = new Date(year, month, d);
+                    if (dObj >= today) break;
+                    const dow = dObj.getDay();
+                    if (dow > 0 && dow < 6 && !isHoliday(dObj)) {
+                        businessDaysInPast++;
                     }
                 }
 
-                const businessDaysInPast = Array.from({ length: daysInMonth }, (_, i) => new Date(year, month, i + 1))
-                    .filter(d => d.getDay() > 0 && d.getDay() < 6 && d < today).length;
                 const absentCount = Math.max(0, businessDaysInPast - presentCount);
 
                 row.push(absentCount);
                 row.push(presentCount);
-                return { row, absentCount, presentCount };
+
+                return { row, absentCount, presentCount, has5Consecutive: maxStreak >= 5 };
             };
 
-            // --- GENERATE ROWS ---
+            // --- GENERATE ROWS & ACCUMULATE METRICS ---
+
             // Male
             wsData.push(["MALE LEARNERS"]);
-            let totalMaleAbsences = 0;
             males.forEach((l, i) => {
                 const res = processLearner(l, i + 1);
                 wsData.push(res.row);
-                totalMaleAbsences += res.absentCount;
+                maleTotalAbsent += res.absentCount;
+                maleTotalPresent += res.presentCount;
+                if (res.has5Consecutive) maleConseAbsences++;
             });
 
             // Female
             wsData.push(["FEMALE LEARNERS"]);
-            let totalFemaleAbsences = 0;
             females.forEach((l, i) => {
                 const res = processLearner(l, males.length + i + 1);
                 wsData.push(res.row);
-                totalFemaleAbsences += res.absentCount;
+                femaleTotalAbsent += res.absentCount;
+                femaleTotalPresent += res.presentCount;
+                if (res.has5Consecutive) femaleConseAbsences++;
             });
 
-            // Footer
+            // --- SUMMARY CALCULATIONS ---
+            const monthStart = new Date(year, month, 1);
+            const monthEnd = new Date(year, month + 1, 0);
+
+            const filterByMonth = (dateStr) => {
+                if (!dateStr) return false;
+                const d = new Date(dateStr);
+                return d.getMonth() === month && d.getFullYear() === year;
+            };
+
+            const countCriteria = (list, criteriaFn) => list.filter(criteriaFn).length;
+
+            // 1. Enrolment as of 1st Friday
+            // Approximation: Count all Regular + (Late/TransIn BEFORE this month).
+            const isBeforeMonth = (dateStr) => {
+                if (!dateStr) return true; // Assume old
+                const d = new Date(dateStr);
+                return d < monthStart;
+            };
+
+            const chkFirstFriday = (l) => {
+                // If Regular: Yes.
+                // If Late/TransIn: Only if date is before this month.
+                if (l.enrollmentStatus === 'regular' || !l.enrollmentStatus) return true;
+                return isBeforeMonth(l.enrollmentDate);
+            };
+
+            const maleFirstFriday = countCriteria(males, chkFirstFriday);
+            const femaleFirstFriday = countCriteria(females, chkFirstFriday);
+            const totalFirstFriday = maleFirstFriday + femaleFirstFriday;
+
+            // 2. Late Enrolment (This Month)
+            const chkLate = (l) => l.enrollmentStatus === 'late' && filterByMonth(l.enrollmentDate);
+            const maleLate = countCriteria(males, chkLate);
+            const femaleLate = countCriteria(females, chkLate);
+            const totalLate = maleLate + femaleLate;
+
+            // 3. Registered Learners as of end of month
+            // Active learners + Transferred Out/NLS (if happened AFTER month end)
+            // If they transferred out THIS month, they are NOT registered as of end of month.
+            // Definition: Active students on the last day of the month.
+            const chkRegistered = (l) => {
+                // Must be enrolled by end of month
+                if (l.enrollmentDate && new Date(l.enrollmentDate) > monthEnd) return false;
+
+                // Must NOT be Transferred Out / NLS before or during this month (i.e. by the end date)
+                if (l.status === 'transferred-out' || l.status === 'nls') {
+                    if (l.statusDate && new Date(l.statusDate) <= monthEnd) return false;
+                }
+                return true;
+            };
+            const maleRegistered = countCriteria(males, chkRegistered);
+            const femaleRegistered = countCriteria(females, chkRegistered);
+            const totalRegistered = maleRegistered + femaleRegistered;
+
+            // 4. Percentage of Enrolment (Registered / FirstFriday * 100)
+            const calcPct = (num, den) => den === 0 ? 0 : (num / den) * 100;
+            const malePctEnrolment = calcPct(maleRegistered, maleFirstFriday);
+            const femalePctEnrolment = calcPct(femaleRegistered, femaleFirstFriday);
+            const totalPctEnrolment = calcPct(totalRegistered, totalFirstFriday);
+
+            // 5. Average Daily Attendance
+            let schoolDaysCount = 0;
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dObj = new Date(year, month, d);
+                // Exclude holidays from ADA divisor
+                if (dObj.getDay() > 0 && dObj.getDay() < 6 && dObj < today && !isHoliday(dObj)) {
+                    schoolDaysCount++;
+                }
+            }
+            if (schoolDaysCount === 0) schoolDaysCount = 1;
+
+            const maleADA = maleTotalPresent / schoolDaysCount;
+            const femaleADA = femaleTotalPresent / schoolDaysCount;
+            const totalADA = (maleTotalPresent + femaleTotalPresent) / schoolDaysCount;
+
+            // 6. Percentage of Attendance
+            const malePctAttendance = calcPct(maleADA, maleRegistered);
+            const femalePctAttendance = calcPct(femaleADA, femaleRegistered);
+            const totalPctAttendance = calcPct(totalADA, totalRegistered);
+
+            // 7. 5 Consecutive Absences (Calculated during loop)
+
+            // 8. NLS (This Month)
+            const chkNLS = (l) => l.status === 'nls' && filterByMonth(l.statusDate);
+            const maleNLS = countCriteria(males, chkNLS);
+            const femaleNLS = countCriteria(females, chkNLS);
+            const totalNLS = maleNLS + femaleNLS;
+
+            // 9. Transferred Out (This Month)
+            const chkTransOut = (l) => l.status === 'transferred-out' && filterByMonth(l.statusDate);
+            const maleTransOut = countCriteria(males, chkTransOut);
+            const femaleTransOut = countCriteria(females, chkTransOut);
+            const totalTransOut = maleTransOut + femaleTransOut;
+
+            // 10. Transferred In (This Month)
+            const chkTransIn = (l) => l.enrollmentStatus === 'transferred-in' && filterByMonth(l.enrollmentDate);
+            const maleTransIn = countCriteria(males, chkTransIn);
+            const femaleTransIn = countCriteria(females, chkTransIn);
+            const totalTransIn = maleTransIn + femaleTransIn;
+
+
+            // --- SUMMARY MATRIX CONSTRUCTION ---
             wsData.push([]);
-            wsData.push(["Summary for the Month"]);
-            wsData.push(["Total Absences", totalMaleAbsences + totalFemaleAbsences]);
+            wsData.push(["SUMMARY REPORT FOR THE MONTH"]);
+            wsData.push(["INDICATOR", "M", "F", "TOTAL"]);
+
+            // Row 1: Enrolment as of 1st Friday
+            wsData.push(["Enrolment as of the 1st Friday of the School Year", maleFirstFriday, femaleFirstFriday, totalFirstFriday]);
+            // Row 2: Late enrolment
+            wsData.push(["Late enrolment (beyond cut-off)", maleLate, femaleLate, totalLate]);
+            // Row 3: Registered Learners as of end of month
+            wsData.push(["Registered Learners as of end of month", maleRegistered, femaleRegistered, totalRegistered]);
+            // Row 4: Percentage of Enrolment
+            wsData.push(["Percentage of Enrolment as of end of month", malePctEnrolment.toFixed(2) + "%", femalePctEnrolment.toFixed(2) + "%", totalPctEnrolment.toFixed(2) + "%"]);
+            // Row 5: Average Daily Attendance
+            wsData.push(["Average Daily Attendance", maleADA.toFixed(2), femaleADA.toFixed(2), totalADA.toFixed(2)]);
+            // Row 6: Percentage of Attendance
+            wsData.push(["Percentage of Attendance for the month", malePctAttendance.toFixed(2) + "%", femalePctAttendance.toFixed(2) + "%", totalPctAttendance.toFixed(2) + "%"]);
+            // Row 7: Number of students absent for 5 consecutive days
+            wsData.push(["Number of students absent for 5 consecutive days", maleConseAbsences, femaleConseAbsences, maleConseAbsences + femaleConseAbsences]);
+            // Row 8: NLS
+            wsData.push(["NLS (No Longer in School)", maleNLS, femaleNLS, totalNLS]);
+            // Row 9: Transferred out
+            wsData.push(["Transferred out", maleTransOut, femaleTransOut, totalTransOut]);
+            // Row 10: Transferred in
+            wsData.push(["Transferred in", maleTransIn, femaleTransIn, totalTransIn]);
+
 
             // Create Workbook
             const wb = XLSX.utils.book_new();
             const ws = XLSX.utils.aoa_to_sheet(wsData);
 
-            // Styling
-            ws['!cols'] = [{ wpx: 150 }, { wch: 30 }]; // Width for Col A (150px) and Name
+            // Styling (Column Widths)
+            ws['!cols'] = [
+                { wpx: 250 }, // Wider first column for indicators
+                { wpx: 50 },  // M
+                { wpx: 50 },  // F
+                { wpx: 50 },  // Total
+                { wpx: 30 },  // Days...
+            ];
 
             XLSX.utils.book_append_sheet(wb, ws, "Attendance");
             const filename = `SF2_Attendance_${monthName.replace(/ /g, '_')}_${sectionFilter}.xlsx`;
@@ -1846,7 +3010,7 @@
             let businessDays = 0;
             for (let d = new Date(startDate); d <= endDate && d <= new Date(); d.setDate(d.getDate() + 1)) {
                 const dayOfWeek = d.getDay();
-                if (dayOfWeek > 0 && dayOfWeek < 6) { // Monday to Friday
+                if (dayOfWeek > 0 && dayOfWeek < 6 && !isHoliday(d)) { // Monday to Friday and NOT holiday
                     businessDays++;
                 }
             }
@@ -1943,7 +3107,7 @@
             for (let day = 1; day <= daysInMonth; day++) {
                 const d = new Date(year, month, day);
                 const dayOfWeek = d.getDay();
-                if (dayOfWeek > 0 && dayOfWeek < 6) { // Monday to Friday
+                if (dayOfWeek > 0 && dayOfWeek < 6 && !isHoliday(d)) { // Monday to Friday and NOT holiday
                     businessDays++;
                 }
             }
@@ -1963,9 +3127,9 @@
                 const checkDate = new Date(year, month, day);
                 const dayOfWeek = checkDate.getDay(); // 0=Sun, 6=Sat
 
-                // Skip weekends
-                if (dayOfWeek === 0 || dayOfWeek === 6) {
-                    rowParts.push(''); // Blank for weekends
+                // Skip weekends OR holidays
+                if (dayOfWeek === 0 || dayOfWeek === 6 || isHoliday(checkDate)) {
+                    rowParts.push(''); // Blank for weekends/holidays
                     continue;
                 }
 
@@ -1987,8 +3151,16 @@
                 }
             }
 
-            const businessDaysInPast = Array.from({ length: daysInMonth }, (_, i) => new Date(year, month, i + 1))
-                .filter(d => d.getDay() > 0 && d.getDay() < 6 && d < today).length;
+            let businessDaysInPast = 0;
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dObj = new Date(year, month, d);
+                if (dObj >= today) break;
+                const dow = dObj.getDay();
+                if (dow > 0 && dow < 6 && !isHoliday(dObj)) {
+                    businessDaysInPast++;
+                }
+            }
+
             const daysAbsent = Math.max(0, businessDaysInPast - daysPresent);
 
             rowParts.push(daysAbsent);
@@ -2247,4 +3419,3 @@
 </body>
 
 </html>
-
