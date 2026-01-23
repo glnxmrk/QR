@@ -133,8 +133,8 @@
                 <i class="fa-solid fa-shield-halved text-xl text-white"></i>
             </div>
             <div>
-                <h1 class="font-bold text-lg leading-tight">SJI<span class="text-cyan-300">Secure</span></h1>
-                <p class="text-xs text-blue-200">Attendance Monitoring System</p>
+                <h1 class="font-bold text-lg leading-tight">SJIS<span class="text-cyan-300">Secure</span></h1>
+                <p class="text-xs text-blue-200">System Ready</p>
             </div>
         </div>
         <button onclick="toggleModal('modal-settings')"
@@ -756,7 +756,7 @@
                     class="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center mb-3 border border-white/20">
                     <i class="fa-solid fa-shield-halved text-3xl text-white"></i>
                 </div>
-                <h1 class="font-bold text-2xl leading-tight">SJI<span class="text-cyan-300">Secure</span></h1>
+                <h1 class="font-bold text-2xl leading-tight">SJIS<span class="text-cyan-300">Secure</span></h1>
             </div>
 
             <!-- Sign-up View -->
@@ -1905,7 +1905,7 @@
         }
 
         // --- LOGIN / AUTH ---
-        const SECRET_CODE = "SJISecure_Pilot";
+        const SECRET_CODE = "ADMIN-SS-2025!";
 
         // Securely hash text using the browser's built-in crypto API
         async function hashText(text) {
@@ -1925,7 +1925,7 @@
 
             if (secretInput.value.trim() !== SECRET_CODE) {
                 alert("Incorrect Secret Code. Please try again.");
-                secretInput.value = 'ADMIN-SS-2026!';
+                secretInput.value = '';
                 return;
             }
 
@@ -3419,6 +3419,3 @@
 </body>
 
 </html>
-
-
-
