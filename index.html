@@ -7,7 +7,7 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0f172a">
     <link rel="apple-touch-icon" href="icon-192.png">
-    <title>SNHSecure</title>
+    <title>SJISecure</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -133,7 +133,7 @@
                 <i class="fa-solid fa-shield-halved text-xl text-white"></i>
             </div>
             <div>
-                <h1 class="font-bold text-lg leading-tight">SNH<span class="text-cyan-300">Secure</span></h1>
+                <h1 class="font-bold text-lg leading-tight">SJI<span class="text-cyan-300">Secure</span></h1>
                 <p class="text-xs text-blue-200">School Attendance Monitoring System</p>
             </div>
         </div>
@@ -609,13 +609,13 @@
                         class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
                         <i class="fa-solid fa-arrow-left"></i>
                     </button>
-                    <h2 class="text-xl font-bold">About SNHSecure</h2>
+                    <h2 class="text-xl font-bold">About SJISecure</h2>
                 </div>
                 <div class="glass-panel rounded-2xl p-6 space-y-4 text-sm text-white/80 leading-relaxed">
                     <div class="flex justify-center mb-4">
                         <i class="fa-solid fa-shield-halved text-6xl text-cyan-400"></i>
                     </div>
-                    <p><strong>SNHSecure</strong> is an advanced school attendance monitoring system designed to provide
+                    <p><strong>SJISecure</strong> is an advanced school attendance monitoring system designed to provide
                         real-time updates to parents and secure tracking for the school administration.</p>
                     <p>Built with privacy and efficiency in mind, it uses QR Code technology to quickly log student
                         entry and exit times, automatically composing SMS notifications for parents.</p>
@@ -802,7 +802,7 @@
                     class="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center mb-3 border border-white/20">
                     <i class="fa-solid fa-shield-halved text-3xl text-white"></i>
                 </div>
-                <h1 class="font-bold text-2xl leading-tight">SNH<span class="text-cyan-300">Secure</span></h1>
+                <h1 class="font-bold text-2xl leading-tight">SJI<span class="text-cyan-300">Secure</span></h1>
             </div>
 
             <!-- Sign-up View -->
@@ -1167,7 +1167,7 @@
                 isLoggedIn: false,
                 username: null,
                 passwordHash: null,
-                deviceId: localStorage.getItem('snh_device_id') || generateDeviceId(),
+                deviceId: localStorage.getItem('SJI_device_id') || generateDeviceId(),
                 boundCode: null,
                 secretVersion: '1.2' // Updated version
             },
@@ -1195,7 +1195,7 @@
             localStorage.setItem('settings', JSON.stringify(store.settings));
             localStorage.setItem('auth', JSON.stringify(store.auth));
             if (store.auth.deviceId) {
-                localStorage.setItem('snh_device_id', store.auth.deviceId);
+                localStorage.setItem('SJI_device_id', store.auth.deviceId);
             }
             localStorage.setItem('profile', JSON.stringify(store.profile));
             localStorage.setItem('classRecords', JSON.stringify(store.classRecords));
@@ -1970,10 +1970,10 @@
 
         // --- DEVICE BINDING & AUTH ---
         function generateDeviceId() {
-            let id = localStorage.getItem('snh_device_id');
+            let id = localStorage.getItem('SJI_device_id');
             if (!id) {
                 id = 'dev-' + Math.random().toString(36).substr(2, 9) + '-' + Date.now().toString(36);
-                localStorage.setItem('snh_device_id', id);
+                localStorage.setItem('SJI_device_id', id);
             }
             return id;
         }
@@ -2658,7 +2658,7 @@
             });
 
             csvContent += csvRows.join('\n');
-            const filename = sectionFilter !== 'all' ? `snhsecure_logs_${sectionFilter}.csv` : "snhsecure_all_logs.csv";
+            const filename = sectionFilter !== 'all' ? `SJIsecure_logs_${sectionFilter}.csv` : "SJIsecure_all_logs.csv";
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -3630,3 +3630,4 @@
 </body>
 
 </html>
+
