@@ -7,7 +7,7 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0f172a">
     <link rel="apple-touch-icon" href="icon-192.png">
-    <title>SJISecure</title>
+    <title>SNHSecure</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -133,7 +133,7 @@
                 <i class="fa-solid fa-shield-halved text-xl text-white"></i>
             </div>
             <div>
-                <h1 class="font-bold text-lg leading-tight">SJI<span class="text-cyan-300">Secure</span></h1>
+                <h1 class="font-bold text-lg leading-tight">SNH<span class="text-cyan-300">Secure</span></h1>
                 <p class="text-xs text-blue-200">School Attendance Monitoring System</p>
             </div>
         </div>
@@ -208,6 +208,51 @@
                                 class="bg-red-500/80 hover:bg-red-500 text-white w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition-all active:scale-95">
                                 <i class="fa-solid fa-stop"></i>
                             </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dashboard Statistics -->
+                <div class="glass-panel rounded-2xl p-4">
+                    <div class="grid grid-cols-3 gap-2 text-center">
+                        <div class="space-y-1">
+                            <div class="text-[10px] font-bold text-blue-300 uppercase tracking-tighter">Male</div>
+                            <div class="grid grid-cols-2 gap-1">
+                                <div class="bg-cyan-500/10 rounded-lg p-1">
+                                    <div class="text-xs font-bold text-cyan-300" id="stats-male-present">0</div>
+                                    <div class="text-[8px] text-white/40 uppercase">Pre</div>
+                                </div>
+                                <div class="bg-red-500/10 rounded-lg p-1">
+                                    <div class="text-xs font-bold text-red-300" id="stats-male-absent">0</div>
+                                    <div class="text-[8px] text-white/40 uppercase">Abs</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="space-y-1">
+                            <div class="text-[10px] font-bold text-pink-300 uppercase tracking-tighter">Female</div>
+                            <div class="grid grid-cols-2 gap-1">
+                                <div class="bg-cyan-500/10 rounded-lg p-1">
+                                    <div class="text-xs font-bold text-cyan-300" id="stats-female-present">0</div>
+                                    <div class="text-[8px] text-white/40 uppercase">Pre</div>
+                                </div>
+                                <div class="bg-red-500/10 rounded-lg p-1">
+                                    <div class="text-xs font-bold text-red-300" id="stats-female-absent">0</div>
+                                    <div class="text-[8px] text-white/40 uppercase">Abs</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="space-y-1">
+                            <div class="text-[10px] font-bold text-white uppercase tracking-tighter">Total</div>
+                            <div class="grid grid-cols-2 gap-1">
+                                <div class="bg-cyan-500/10 rounded-lg p-1 border border-cyan-500/20">
+                                    <div class="text-xs font-bold text-cyan-300" id="stats-total-present">0</div>
+                                    <div class="text-[8px] text-white/40 uppercase">Pre</div>
+                                </div>
+                                <div class="bg-red-500/10 rounded-lg p-1 border border-red-500/20">
+                                    <div class="text-xs font-bold text-red-300" id="stats-total-absent">0</div>
+                                    <div class="text-[8px] text-white/40 uppercase">Abs</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -564,19 +609,20 @@
                         class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
                         <i class="fa-solid fa-arrow-left"></i>
                     </button>
-                    <h2 class="text-xl font-bold">About SJISecure</h2>
+                    <h2 class="text-xl font-bold">About SNHSecure</h2>
                 </div>
                 <div class="glass-panel rounded-2xl p-6 space-y-4 text-sm text-white/80 leading-relaxed">
                     <div class="flex justify-center mb-4">
                         <i class="fa-solid fa-shield-halved text-6xl text-cyan-400"></i>
                     </div>
-                    <p><strong>SJISecure</strong> is an advanced school attendance monitoring system designed to provide
+                    <p><strong>SNHSecure</strong> is an advanced school attendance monitoring system designed to provide
                         real-time updates to parents and secure tracking for the school administration.</p>
                     <p>Built with privacy and efficiency in mind, it uses QR Code technology to quickly log student
                         entry and exit times, automatically composing SMS notifications for parents.</p>
                     <div class="border-t border-white/10 pt-4 mt-4">
                         <p class="text-xs text-center text-white/40">Version 1.2.0 (PWA)</p>
-                        <p class="text-xs text-center text-white/40">&copy; 2025 SJI School Systems</p>
+                        <p class="text-xs text-center text-white/40">&copy; 2026 | Designed and Developed by Glenn Mark
+                            S. Presores</p>
                     </div>
                 </div>
             </div>
@@ -756,7 +802,7 @@
                     class="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center mb-3 border border-white/20">
                     <i class="fa-solid fa-shield-halved text-3xl text-white"></i>
                 </div>
-                <h1 class="font-bold text-2xl leading-tight">SJIS<span class="text-cyan-300">Secure</span></h1>
+                <h1 class="font-bold text-2xl leading-tight">SNH<span class="text-cyan-300">Secure</span></h1>
             </div>
 
             <!-- Sign-up View -->
@@ -903,6 +949,14 @@
         <div class="glass-panel bg-slate-900/90 rounded-2xl w-full max-w-sm p-6 border-white/20">
             <h3 class="text-xl font-bold mb-4">Settings</h3>
             <div class="space-y-4">
+                <div class="border-b border-white/10 pb-4">
+                    <label class="block text-xs uppercase text-blue-200 font-bold tracking-wider mb-2">School Starts
+                        (Late Threshold)</label>
+                    <input type="time" id="settings-late-time" class="glass-input w-full p-3 rounded-xl text-white"
+                        style="color-scheme: dark;">
+                    <p class="text-[10px] text-white/50 mt-1">Students arriving after this time will be marked as LATE.
+                    </p>
+                </div>
                 <div class="border-b border-white/10 pb-4">
                     <label class="flex items-center justify-between cursor-pointer">
                         <span class="block text-xs uppercase text-blue-200 font-bold tracking-wider">Send SMS
@@ -1106,13 +1160,16 @@
             settings: JSON.parse(localStorage.getItem('settings')) || {
                 sendSms: true,
                 templateIn: "Good day! Your child {name} has arrived at school at {time}.",
-                templateOut: "Good day! Your child {name} has left school at {time}."
+                templateOut: "Good day! Your child {name} has left school at {time}.",
+                lateTime: "07:30"
             },
             auth: JSON.parse(localStorage.getItem('auth')) || {
                 isLoggedIn: false,
                 username: null,
                 passwordHash: null,
-                secretVersion: '1.0' // To force re-login on future updates
+                deviceId: localStorage.getItem('snh_device_id') || generateDeviceId(),
+                boundCode: null,
+                secretVersion: '1.2' // Updated version
             },
             profile: JSON.parse(localStorage.getItem('profile')) || {
                 name: '',
@@ -1137,6 +1194,9 @@
             localStorage.setItem('holidays', JSON.stringify(store.holidays));
             localStorage.setItem('settings', JSON.stringify(store.settings));
             localStorage.setItem('auth', JSON.stringify(store.auth));
+            if (store.auth.deviceId) {
+                localStorage.setItem('snh_device_id', store.auth.deviceId);
+            }
             localStorage.setItem('profile', JSON.stringify(store.profile));
             localStorage.setItem('classRecords', JSON.stringify(store.classRecords));
         };
@@ -1816,6 +1876,7 @@
                     document.getElementById('settings-send-sms').checked = store.settings.sendSms;
                     document.getElementById('settings-template-in').value = store.settings.templateIn;
                     document.getElementById('settings-template-out').value = store.settings.templateOut;
+                    document.getElementById('settings-late-time').value = store.settings.lateTime || "07:30";
                     document.getElementById('sms-templates-container').style.display = store.settings.sendSms ? 'block' : 'none';
                     document.getElementById('settings-send-sms').onchange = (e) => {
                         document.getElementById('sms-templates-container').style.display = e.target.checked ? 'block' : 'none';
@@ -1835,6 +1896,7 @@
             const tplOut = document.getElementById('settings-template-out').value;
             store.settings.templateIn = tplIn; // Note: these are now inside a div
             store.settings.templateOut = tplOut;
+            store.settings.lateTime = document.getElementById('settings-late-time').value;
             save();
             toggleModal('modal-settings');
             alert("Settings saved!");
@@ -1905,7 +1967,18 @@
         }
 
         // --- LOGIN / AUTH ---
-        const SECRET_CODE = "ATD-7K9QX2";
+
+        // --- DEVICE BINDING & AUTH ---
+        function generateDeviceId() {
+            let id = localStorage.getItem('snh_device_id');
+            if (!id) {
+                id = 'dev-' + Math.random().toString(36).substr(2, 9) + '-' + Date.now().toString(36);
+                localStorage.setItem('snh_device_id', id);
+            }
+            return id;
+        }
+
+        const VALID_CODES = ["ADMIN-SS-2026!"];
 
         // Securely hash text using the browser's built-in crypto API
         async function hashText(text) {
@@ -1923,9 +1996,19 @@
             const passwordInput = document.getElementById('signup-password');
             const passwordConfirmInput = document.getElementById('signup-password-confirm');
 
-            if (secretInput.value.trim() !== SECRET_CODE) {
-                alert("Incorrect Secret Code. Please try again.");
+            const secretEntered = secretInput.value.trim();
+            if (!VALID_CODES.includes(secretEntered)) {
+                alert("Invalid Secret Code. Please try again.");
                 secretInput.value = '';
+                return;
+            }
+
+            // --- LOCAL DEVICE BINDING LOGIC ---
+            // Note: In a real server app, this check would happen on the backend.
+            // Locally, we track if THIS device has already used a different code, 
+            // or if THIS code is already bound to this device but with a different user.
+            if (store.auth.boundCode && store.auth.boundCode !== secretEntered) {
+                alert("This device is already bound to another secret code.");
                 return;
             }
 
@@ -1947,6 +2030,8 @@
             store.auth.username = username;
             store.auth.passwordHash = passwordHash;
             store.auth.isLoggedIn = true;
+            store.auth.boundCode = secretEntered; // Bind the code
+            store.auth.deviceId = generateDeviceId(); // Ensure device ID exists
             store.profile.name = username; // Also save to profile
             save();
 
@@ -2100,6 +2185,7 @@
             };
             store.learners.push(l);
             save();
+            updateDashboardStats(); // Update dashboard counts
             f.reset();
             // Reset default date to today for next entry (if needed, or leave blank)
             toggleModal('modal-add-learner');
@@ -2110,6 +2196,7 @@
             if (confirm("Delete this learner?")) {
                 store.learners = store.learners.filter(l => l.id !== id);
                 save();
+                updateDashboardStats(); // Update dashboard counts
                 renderLearners();
             }
         }
@@ -2277,6 +2364,49 @@
         // --- LOGIC ---
         let lastScan = 0;
 
+        // --- DASHBOARD STATISTICS ---
+        function updateDashboardStats() {
+            const today = new Date().toLocaleDateString();
+
+            // Get unique students who have an 'in' log today
+            const presentNames = new Set(
+                store.logs
+                    .filter(log => log.date === today && log.type === 'in')
+                    .map(log => log.name)
+            );
+
+            // Calculations
+            let mPresent = 0, fPresent = 0;
+            let mTotal = 0, fTotal = 0;
+
+            store.learners.forEach(learner => {
+                const isPresent = presentNames.has(learner.name);
+                if (learner.gender === 'Male') {
+                    mTotal++;
+                    if (isPresent) mPresent++;
+                } else if (learner.gender === 'Female') {
+                    fTotal++;
+                    if (isPresent) fPresent++;
+                }
+            });
+
+            const mAbsent = mTotal - mPresent;
+            const fAbsent = fTotal - fPresent;
+            const tPresent = mPresent + fPresent;
+            const tAbsent = mAbsent + fAbsent;
+
+            // Update UI - check if elements exist (in case we are not in scan view)
+            const malePresentEl = document.getElementById('stats-male-present');
+            if (malePresentEl) {
+                malePresentEl.innerText = mPresent;
+                document.getElementById('stats-male-absent').innerText = mAbsent;
+                document.getElementById('stats-female-present').innerText = fPresent;
+                document.getElementById('stats-female-absent').innerText = fAbsent;
+                document.getElementById('stats-total-present').innerText = tPresent;
+                document.getElementById('stats-total-absent').innerText = tAbsent;
+            }
+        }
+
         function onScan(txt) {
             const now = Date.now();
             if (now - lastScan < 4000) return; // 4s cooldown
@@ -2304,15 +2434,25 @@
                 date: dateStr,
                 time: timeStr,
                 type: store.mode,
-                status: 'present'
+                status: 'present',
+                isLate: false
             };
+
+            // Tardiness Check (only for Time In)
+            if (store.mode === 'in' && store.settings.lateTime) {
+                const currentTime = d.getHours().toString().padStart(2, '0') + ":" + d.getMinutes().toString().padStart(2, '0');
+                if (currentTime > store.settings.lateTime) {
+                    entry.isLate = true;
+                }
+            }
 
             store.logs.push(entry);
             save(); // Save immediately
+            updateDashboardStats(); // Refresh dashboard
 
-            const typeText = store.mode === 'in' ? 'Time In' : 'Time Out';
+            const typeText = store.mode === 'in' ? (entry.isLate ? 'LATE Time In' : 'Time In') : 'Time Out';
 
-            logFeedback(`Marked ${data.n} (${typeText})`, "success");
+            logFeedback(`Marked ${data.n} (${typeText})`, entry.isLate ? "warning" : "success");
 
             // SMS Trigger
             // SMS Trigger (Automatic)
@@ -2435,6 +2575,9 @@
                                 
                                 const id = 'qr-' + Math.random().toString(36).substr(2, 9);
                                 
+                                // Consistent Payload
+                                const data = JSON.stringify({ n: l.name, s: l.section, p: l.parent_no });
+
                                 card.innerHTML = \`
                                     <div class="name">\${l.name}</div>
                                     <div class="qr-container" id="\${id}"></div>
@@ -2442,10 +2585,14 @@
                                 \`;
                                 grid.appendChild(card);
                                 
+                                // Consistent Visuals
                                 new QRCode(document.getElementById(id), {
-                                    text: l.id,
-                                    width: 128,
-                                    height: 128
+                                    text: data,
+                                    width: 160,
+                                    height: 160,
+                                    colorDark: "#1e293b",
+                                    colorLight: "#ffffff",
+                                    correctLevel: QRCode.CorrectLevel.M
                                 });
                             });
                         }, 500);
@@ -2511,7 +2658,7 @@
             });
 
             csvContent += csvRows.join('\n');
-            const filename = sectionFilter !== 'all' ? `sjisecure_logs_${sectionFilter}.csv` : "sjisecure_all_logs.csv";
+            const filename = sectionFilter !== 'all' ? `snhsecure_logs_${sectionFilter}.csv` : "snhsecure_all_logs.csv";
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -3357,13 +3504,43 @@
             const reportData = getStudentLogs(studentId);
             if (!reportData) return;
 
-            let table = `<table class="w-full text-left text-sm"><thead><tr class="text-blue-100 uppercase text-xs font-semibold"><th class="p-3">Date</th><th class="p-3">Time</th><th class="p-3 text-right">Status</th></tr></thead><tbody>`;
-            if (reportData.logs.length === 0) {
-                table += `<tr><td colspan="3" class="p-4 text-center text-white/50">No attendance records for this student.</td></tr>`;
+            // Group logs by date
+            const groupedLogs = {};
+            const chronologicalLogs = [...reportData.logs].sort((a, b) => {
+                const dateA = new Date(a.date + ' ' + a.time);
+                const dateB = new Date(b.date + ' ' + b.time);
+                return dateA - dateB;
+            });
+
+            chronologicalLogs.forEach(log => {
+                if (!groupedLogs[log.date]) {
+                    groupedLogs[log.date] = { in: '', out: '', late: false };
+                }
+                if (log.type === 'in') {
+                    if (!groupedLogs[log.date].in) {
+                        groupedLogs[log.date].in = log.time;
+                        groupedLogs[log.date].late = log.isLate || false;
+                    }
+                } else if (log.type === 'out') {
+                    groupedLogs[log.date].out = log.time;
+                }
+            });
+
+            const dates = Object.keys(groupedLogs).sort((a, b) => new Date(a) - new Date(b)).reverse(); // Newest first
+
+            let table = `<table class="w-full text-left text-sm"><thead><tr class="text-blue-100 uppercase text-xs font-semibold"><th class="p-3">Date</th><th class="p-3">In</th><th class="p-3">Out</th><th class="p-3 text-right">Remarks</th></tr></thead><tbody>`;
+            if (dates.length === 0) {
+                table += `<tr><td colspan="4" class="p-4 text-center text-white/50">No records</td></tr>`;
             } else {
-                reportData.logs.forEach(log => {
-                    const badge = log.type === 'out' ? '<span class="bg-orange-500/20 text-orange-300 text-[10px] px-2 py-1 rounded-full uppercase font-bold">OUT</span>' : '<span class="bg-cyan-500/20 text-cyan-300 text-[10px] px-2 py-1 rounded-full uppercase font-bold">IN</span>';
-                    table += `<tr class="border-t border-white/10"><td class="p-3">${log.date}</td><td class="p-3 font-mono text-white/70">${log.time}</td><td class="p-3 text-right">${badge}</td></tr>`;
+                dates.forEach(date => {
+                    const data = groupedLogs[date];
+                    const lateBadge = data.late ? '<span class="bg-red-500/20 text-red-300 text-[10px] px-2 py-1 rounded-full uppercase font-bold">LATE</span>' : '';
+                    table += `<tr class="border-t border-white/10">
+                        <td class="p-3 font-medium text-white/90">${date}</td>
+                        <td class="p-3 font-mono text-white/70">${data.in || '-'}</td>
+                        <td class="p-3 font-mono text-white/70">${data.out || '-'}</td>
+                        <td class="p-3 text-right">${lateBadge}</td>
+                    </tr>`;
                 });
             }
             table += '</tbody></table>';
@@ -3374,6 +3551,7 @@
             document.getElementById('report-view-container').classList.remove('hidden');
         }
 
+
         function downloadStudentReport() {
             const studentId = document.getElementById('report-student-select').value;
             const reportData = getStudentLogs(studentId);
@@ -3382,10 +3560,42 @@
             let csvContent = `Attendance Report for ${reportData.learner.name}\n`;
             csvContent += `Section: ${reportData.learner.section}\n`;
             csvContent += `Report Title: ${reportData.title}\n\n`;
-            csvContent += "Date,Time,Status\n";
+            csvContent += "Date,Time In,Time Out,Remarks\n";
 
-            reportData.logs.forEach(log => {
-                const row = [log.date, log.time, log.type.toUpperCase()];
+            // Group logs by date to have In and Out in separate columns
+            const groupedLogs = {};
+            // The logs from getStudentLogs are reversed (newest first). 
+            // We want to process them to pick the first "in" and last "out" OR vice-versa?
+            // Usually, first "in" and last "out" for the day.
+            // Let's sort them chronologically for processing.
+            const chronologicalLogs = [...reportData.logs].sort((a, b) => {
+                const dateA = new Date(a.date + ' ' + a.time);
+                const dateB = new Date(b.date + ' ' + b.time);
+                return dateA - dateB;
+            });
+
+            chronologicalLogs.forEach(log => {
+                if (!groupedLogs[log.date]) {
+                    groupedLogs[log.date] = { in: '', out: '', late: false };
+                }
+                if (log.type === 'in') {
+                    // Only set if not already set (first "in" of the day)
+                    if (!groupedLogs[log.date].in) {
+                        groupedLogs[log.date].in = log.time;
+                        groupedLogs[log.date].late = log.isLate || false;
+                    }
+                } else if (log.type === 'out') {
+                    // Always update to get the LAST "out" of the day
+                    groupedLogs[log.date].out = log.time;
+                }
+            });
+
+            // Get sorted dates
+            const dates = Object.keys(groupedLogs).sort((a, b) => new Date(a) - new Date(b));
+
+            dates.forEach(date => {
+                const data = groupedLogs[date];
+                const row = [date, data.in, data.out, data.late ? 'LATE' : ''];
                 csvContent += row.map(sanitizeCsvField).join(',') + '\n';
             });
 
@@ -3414,12 +3624,9 @@
         function initialize_app() {
             setMode('in'); // Set initial mode
             navSwitch('scan'); // Start on scan view
+            updateDashboardStats(); // Update dashboard counts
         }
     </script>
 </body>
 
 </html>
-
-
-
-
